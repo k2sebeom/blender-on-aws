@@ -62,7 +62,7 @@ class WorkspaceService:
         Returns:
             Path: Path to the created job directory
         """
-        job_dir = self.workspace_root / job_name
+        job_dir = self.workspace_root / 'jobs' / job_name
         job_dir.mkdir(parents=True, exist_ok=True)
         return job_dir
     
