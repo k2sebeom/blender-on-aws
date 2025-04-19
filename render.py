@@ -42,7 +42,11 @@ with st.container():
     
     # Frame inputs based on mode
     if render_mode == "Still Frame":
-        frame_number = st.number_input("Frame Number", min_value=1, value=1)
+        frames_input = st.text_input(
+            "Frame Range",
+            placeholder="Single number (e.g., 1) or range (e.g., 1..100) or list (e.g., 1,2,3)",
+            value=1,
+        )
     else:  # Animation mode
         col1, col2 = st.columns(2)
         with col1:
@@ -59,6 +63,23 @@ with st.container():
         if not job_name:
             st.error("Please enter a job name")
             is_valid = False
+
+        if not frames_input:
+            st.error("Please enter frame range")
+            is_valid = False
+        else:
+            # Validate frame range format
+            try:
+                for frame in map(int, frames_input.replace("..", ",").split(",")):
+                    if frame < 1:
+                        st.error("Frame number must be positive")
+                        is_valid = False
+                        break
+            except ValueError:
+                st.error(
+                    "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
+                )
+                is_valid = False
 
         if "render_button" not in st.session_state:
             st.session_state.is_rendering = False
@@ -84,7 +105,7 @@ with st.container():
             - Mode: {render_mode}"""
             
             if render_mode == "Still Frame":
-                settings_info += f"\n            - Frame: {frame_number}"
+                settings_info += f"\n            - Frame: {frames_input}"
             else:
                 settings_info += f"\n            - Start Frame: {start_frame}"
                 if end_frame:
@@ -112,7 +133,7 @@ with st.container():
                     }
                     
                     if render_mode == "Still Frame":
-                        meta["frame"] = frame_number
+                        meta["frame"] = frames_input
                     else:
                         meta["start_frame"] = start_frame
                         meta["end_frame"] = end_frame
@@ -143,8 +164,9 @@ with st.container():
                                 stored_file, 
                                 run_dir,
                                 mode=mode,
-                                start_frame=frame_number if mode == "still" else start_frame,
-                                end_frame=None if mode == "still" else end_frame
+                                start_frame=None if mode == "still" else start_frame,
+                                end_frame=None if mode == "still" else end_frame,
+                                frames_input=frames_input,
                             )
                         )
 

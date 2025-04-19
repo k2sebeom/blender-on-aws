@@ -16,7 +16,7 @@ class BlenderService:
         self.workspace_root = workspace_root
         self.ffmpeg_service = FFmpegService()
         
-    def render_blend_file(self, blend_file: Path, run_dir: Path, mode: str = "still", start_frame: int = 1, end_frame: int = None) -> tuple[List[Tuple[Path, Path]], str, str]:
+    def render_blend_file(self, blend_file: Path, run_dir: Path, mode: str = "still", start_frame: int = 1, end_frame: int = None, frames_input: str = None) -> tuple[List[Tuple[Path, Path]], str, str]:
         """
         Create render directory and execute blender render command.
         
@@ -26,6 +26,7 @@ class BlenderService:
             mode (str): Render mode - either "still" or "anim"
             start_frame (int): Start frame number (default: 1)
             end_frame (int): End frame number for animation mode (default: None)
+            frames_input (str): Render target frames (default: None)
             
         Returns:
             tuple[List[Tuple[Path, Path]], str, str]: Tuple containing:
@@ -56,7 +57,10 @@ class BlenderService:
 
         # Add mode-specific arguments
         if mode == "still":
-            cmd.extend(["-f", str(start_frame)])
+            if frames_input:
+                cmd.extend(["-f", frames_input])
+            else:
+                cmd.extend(["-f", 1])
         else:  # anim mode
             cmd.extend(["-s", str(start_frame)])
             if end_frame is not None:
