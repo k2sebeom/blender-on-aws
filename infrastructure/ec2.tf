@@ -48,13 +48,8 @@ resource "aws_instance" "blender_instance" {
   }
 
   # Script to mount EFS
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              yum install -y amazon-efs-utils
-              mkdir -p /mnt/efs
-              mount -t efs ${aws_efs_file_system.blender_efs.id}:/ /mnt/efs
-              echo "${aws_efs_file_system.blender_efs.id}:/ /mnt/efs efs defaults,_netdev 0 0" >> /etc/fstab
-              ${var.user_data}
-              EOF
+  user_data = templatefile("${path.module}/user_data.tpl", {
+    efs_id             = aws_efs_file_system.blender_efs.id
+    additional_user_data = var.user_data
+  })
 }
