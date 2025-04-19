@@ -1,6 +1,7 @@
 # EFS File System
 resource "aws_efs_file_system" "blender_efs" {
   creation_token = "blender-efs"
+  encrypted = true
   
   tags = {
     Name = "blender-efs"

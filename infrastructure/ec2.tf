@@ -33,7 +33,7 @@ resource "aws_instance" "blender_instance" {
   vpc_security_group_ids = [aws_security_group.blender_sg.id]
 
   root_block_device {
-    volume_size = 30
+    volume_size = 75
     volume_type = "gp3"
   }
 
@@ -43,7 +43,6 @@ resource "aws_instance" "blender_instance" {
 
   # Script to mount EFS
   user_data = templatefile("${path.module}/user_data.tpl", {
-    efs_id             = aws_efs_file_system.blender_efs.id
-    additional_user_data = var.user_data
+    efs_id             = aws_efs_file_system.blender_efs.id,
   })
 }

@@ -1,6 +1,6 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.0.0"
+  version = "5.19.0"
 
   name = "blender-vpc"
   cidr = "10.0.0.0/16"
@@ -16,7 +16,6 @@ module "vpc" {
   enable_dns_support   = true
 
   tags = {
-    Environment = "production"
     Project     = "blender-aws"
   }
 }

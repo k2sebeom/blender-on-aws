@@ -15,8 +15,8 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
-variable "user_data" {
-  description = "User data script for EC2 instance"
+variable "github_repo" {
+  description = "Github repo for blender-on-aws project"
   type        = string
-  default     = ""
+  default = "https://github.com/k2sebeom/blender-on-aws.git"
 }
