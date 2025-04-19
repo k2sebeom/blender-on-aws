@@ -4,7 +4,7 @@ from datetime import datetime
 import streamlit as st
 import shutil
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 class WorkspaceService:
     """Service class to handle workspace-related operations."""
@@ -18,6 +18,7 @@ class WorkspaceService:
         """
         self.config = config
         self.workspace_root = Path(config['workspace']['root'])
+        self.items_per_page = 10  # Default pagination size
     
     def initialize_workspace(self) -> bool:
         """
@@ -104,17 +105,51 @@ class WorkspaceService:
         file_path.write_bytes(file_data)
         return file_path
 
-    def get_all_jobs(self) -> List[str]:
+    def get_paginated_jobs(self, page: int = 1) -> Tuple[List[Dict], int]:
         """
-        Get a list of all job names in the workspace.
+        Get a paginated list of jobs with their details.
         
+        Args:
+            page (int): Page number (1-based)
+            
         Returns:
-            List[str]: List of job names
+            Tuple[List[Dict], int]: (List of job details, total number of pages)
         """
         jobs_dir = self.workspace_root / 'jobs'
         if not jobs_dir.exists():
-            return []
-        return [job.name for job in jobs_dir.iterdir() if job.is_dir()]
+            return [], 0
+
+        all_jobs = []
+        for job in jobs_dir.iterdir():
+            if not job.is_dir():
+                continue
+            
+            runs = self.get_job_runs(job.name)
+            num_runs = len(runs)
+            
+            # Get creation time of the job directory
+            created_at = datetime.fromtimestamp(job.stat().st_ctime)
+            
+            job_info = {
+                "name": job.name,
+                "created_at": created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "num_runs": num_runs
+            }
+            all_jobs.append(job_info)
+
+        # Sort jobs by creation time (newest first)
+        all_jobs.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        # Calculate pagination
+        total_jobs = len(all_jobs)
+        total_pages = (total_jobs + self.items_per_page - 1) // self.items_per_page
+        
+        # Get jobs for current page
+        start_idx = (page - 1) * self.items_per_page
+        end_idx = start_idx + self.items_per_page
+        paginated_jobs = all_jobs[start_idx:end_idx]
+        
+        return paginated_jobs, total_pages
 
     def get_job_runs(self, job_name: str) -> List[str]:
         """
@@ -187,3 +222,38 @@ class WorkspaceService:
         render_files = list(render_dir.glob('*.png')) if render_dir.exists() else []
 
         return (source_files, render_files)
+
+    def get_run_stats(self, job_name: str, run_id: str) -> Dict:
+        """
+        Get statistics for a specific run.
+        
+        Args:
+            job_name (str): Name of the job
+            run_id (str): Run timestamp
+            
+        Returns:
+            Dict: Run statistics including number of rendered files and total render time
+        """
+        run_dir = self.workspace_root / 'jobs' / job_name / run_id
+        if not run_dir.exists():
+            return {"num_files": 0, "render_time": 0}
+
+        render_dir = run_dir / "render"
+        if not render_dir.exists():
+            return {"num_files": 0, "render_time": 0}
+
+        render_files = list(render_dir.glob('*.png'))
+        num_files = len(render_files)
+
+        # Calculate total render time
+        if num_files > 0:
+            dir_creation_time = datetime.fromtimestamp(run_dir.stat().st_ctime)
+            last_render_time = max(datetime.fromtimestamp(f.stat().st_mtime) for f in render_files)
+            render_time = (last_render_time - dir_creation_time).total_seconds() / 60  # Convert to minutes
+        else:
+            render_time = 0
+
+        return {
+            "num_files": num_files,
+            "render_time": round(render_time, 2)
+        }
