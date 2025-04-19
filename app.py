@@ -148,39 +148,37 @@ def main(config):
                         )
                         
                         st.success(f"File stored successfully at: {stored_file}")
+                        
+                        # Start rendering process
+                        with st.spinner("Rendering your file..."):
+                            rendered_files = workspace_service.render_blend_file(
+                                stored_file,
+                                run_dir,
+                                frames_input
+                            )
+                            st.success("Rendering completed successfully!")
+                            
+                            # Display rendered images
+                            st.subheader("📥 Rendered Files")
+                            for idx, render_file in enumerate(rendered_files):
+                                # Read the PNG file
+                                with open(render_file, "rb") as f:
+                                    image_bytes = f.read()
+                                
+                                # Display the image
+                                st.image(image_bytes, caption=f"Frame {idx + 1}")
+                                
+                                # Add download button for each frame
+                                st.download_button(
+                                    label=f"Download Frame {idx + 1}",
+                                    data=image_bytes,
+                                    file_name=render_file.name,
+                                    mime="image/png",
+                                )
+                                
                     except Exception as e:
                         st.error(f"Error processing file: {e}")
                         st.stop()
-
-                    # Show progress bar for rendering
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
-
-                    # Simulate rendering progress (will be replaced with actual rendering)
-                    for i in range(100):
-                        time.sleep(
-                            0.1
-                        )  # This will be replaced with actual rendering progress
-                        progress_bar.progress(i + 1)
-                        status_text.text(f"Rendering: {i + 1}%")
-
-                    # Show success message
-                    st.success("Rendering completed successfully!")
-
-                    # Download section
-                    st.subheader("📥 Download Result")
-                    st.markdown("""
-                        Your rendered file is ready for download!
-                        
-                        Click the button below to download your rendered file:
-                    """)
-                    # This will be replaced with actual download link
-                    st.download_button(
-                        label="Download Rendered File",
-                        data=b"placeholder",  # This will be replaced with actual file data
-                        file_name="rendered_result.png",
-                        mime="image/png",
-                    )
 
     # Job History Section
     with st.container():
