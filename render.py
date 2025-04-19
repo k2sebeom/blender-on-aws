@@ -167,7 +167,7 @@ with st.container():
                                 mode=mode,
                                 start_frame=None if mode == "still" else start_frame,
                                 end_frame=None if mode == "still" else end_frame,
-                                frames_input=frames_input,
+                                frames_input=frames_input if mode == "still" else None,
                             )
                         )
 
