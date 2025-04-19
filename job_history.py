@@ -68,16 +68,6 @@ def main():
         jobs, total_pages = workspace_service.get_paginated_jobs(st.session_state.page)
         
         if jobs:
-            # Create buttons for job selection
-            for job in jobs:
-                if st.button(
-                    job["name"],
-                    key=f"job_{job['name']}",
-                    help="Click to view job details",
-                    use_container_width=True
-                ):
-                    st.session_state.selected_job = job["name"]
-            
             # Create DataFrame and display table
             df = pd.DataFrame(
                 [
@@ -89,8 +79,16 @@ def main():
                     for job in jobs
                 ]
             )
-            st.table(df)
-            
+            event = st.dataframe(
+                df,
+                on_select='rerun',
+                selection_mode='single-row',
+                hide_index=True,
+            )
+            if len(event.selection.get('rows')) > 0:
+                selected_row = event.selection.get('rows')[0]
+                st.session_state.selected_job = df.iloc[selected_row]['Job Name']
+
             # Pagination controls
             cols = st.columns(4)
             with cols[0]:
