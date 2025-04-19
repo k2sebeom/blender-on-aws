@@ -3,6 +3,7 @@ from typing import Dict
 from datetime import datetime
 import streamlit as st
 import shutil
+import json
 from typing import List, Tuple
 
 class WorkspaceService:
@@ -260,7 +261,7 @@ class WorkspaceService:
 
     def get_run_stats(self, job_name: str, run_id: str) -> Dict:
         """
-        Get statistics for a specific run.
+        Get statistics for a specific run from meta.json.
         
         Args:
             job_name (str): Name of the job
@@ -270,25 +271,19 @@ class WorkspaceService:
             Dict: Run statistics including number of rendered files and total render time
         """
         run_dir = self.workspace_root / 'jobs' / job_name / run_id
-        if not run_dir.exists():
+        meta_file = run_dir / "meta.json"
+        
+        if not meta_file.exists():
             return {"num_files": 0, "render_time": 0}
-
-        render_dir = run_dir / "render"
-        if not render_dir.exists():
+            
+        try:
+            with open(meta_file) as f:
+                meta = json.load(f)
+                
+            return {
+                "num_files": meta["num_files"],
+                "render_time": meta["render_time"]
+            }
+        except Exception as e:
+            st.error(f"Error reading meta.json: {e}")
             return {"num_files": 0, "render_time": 0}
-
-        render_files = list(render_dir.glob('*.png'))
-        num_files = len(render_files)
-
-        # Calculate total render time
-        if num_files > 0:
-            dir_creation_time = datetime.fromtimestamp(run_dir.stat().st_ctime)
-            last_render_time = max(datetime.fromtimestamp(f.stat().st_mtime) for f in render_files)
-            render_time = (last_render_time - dir_creation_time).total_seconds()  # Keep as seconds
-        else:
-            render_time = 0
-
-        return {
-            "num_files": num_files,
-            "render_time": round(render_time, 2)
-        }
