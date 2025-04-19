@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 from src.utils.config_init import initialize_app
 from src.utils.styles import get_common_styles
 
@@ -130,7 +131,7 @@ def main():
                         st.metric("Total Render Time", f"{minutes} min {seconds} sec")
 
                     # Get and display run details
-                    source_files, render_files, mp4_file = workspace_service.get_run_details(
+                    source_files, render_files = workspace_service.get_run_details(
                         st.session_state.selected_job, selected_run
                     )
 
@@ -152,38 +153,47 @@ def main():
 
                     # Display render outputs
                     st.markdown("### Render Outputs")
-                    if mp4_file:  # Animation output
-                        st.video(str(mp4_file))
-                        # Add download button for the video
-                        with open(mp4_file, "rb") as f:
-                            st.download_button(
-                                label="Download Animation",
-                                data=f,
-                                file_name=mp4_file.name,
-                                mime="video/mp4",
-                            )
-                    elif render_files:  # Still image outputs
-                        # Create 3 columns for the grid
-                        cols = st.columns(3)
-
-                        # Display compressed JPGs with PNG download links
-                        for idx, (jpg_file, png_file) in enumerate(render_files):
-                            with cols[idx % 3]:  # Distribute across 3 columns
-                                # Display compressed JPG
-                                st.image(
-                                    jpg_file,
-                                    caption=png_file.name,  # Show original PNG name
-                                    use_container_width=True,
-                                )
-                                # Provide download link for original PNG
-                                with open(png_file, "rb") as f:
-                                    png_bytes = f.read()
+                    if render_files:
+                        # Check if this is an animation or still image based on mode
+                        is_animation = stats.get("mode") == "Animation"
+                        
+                        if is_animation:
+                            # For animation, look for mp4 file in static directory
+                            static_dir = Path(render_files[0][0]).parent
+                            mp4_files = list(static_dir.glob("*.mp4"))
+                            if mp4_files:
+                                mp4_file = mp4_files[0]
+                                st.video(str(mp4_file))
+                                # Add download button for the video
+                                with open(mp4_file, "rb") as f:
                                     st.download_button(
-                                        f"Download {png_file.name}",
-                                        png_bytes,
-                                        file_name=png_file.name,
-                                        mime="image/png",
+                                        label="Download Animation",
+                                        data=f,
+                                        file_name=mp4_file.name,
+                                        mime="video/mp4",
                                     )
+                        else:  # Still image outputs
+                            # Create 3 columns for the grid
+                            cols = st.columns(3)
+
+                            # Display compressed JPGs with PNG download links
+                            for idx, (jpg_file, png_file) in enumerate(render_files):
+                                with cols[idx % 3]:  # Distribute across 3 columns
+                                    # Display compressed JPG
+                                    st.image(
+                                        jpg_file,
+                                        caption=png_file.name,  # Show original PNG name
+                                        use_container_width=True,
+                                    )
+                                    # Provide download link for original PNG
+                                    with open(png_file, "rb") as f:
+                                        png_bytes = f.read()
+                                        st.download_button(
+                                            f"Download {png_file.name}",
+                                            png_bytes,
+                                            file_name=png_file.name,
+                                            mime="image/png",
+                                        )
             else:
                 st.info("No runs found for this job.")
 

@@ -138,7 +138,7 @@ with st.container():
 
                         # Render the file and get outputs
                         mode = "still" if render_mode == "Still Frame" else "anim"
-                        rendered_files, mp4_file, stdout, stderr = (
+                        rendered_files, stdout, stderr = (
                             blender_service.render_blend_file(
                                 stored_file, 
                                 run_dir,
@@ -150,7 +150,7 @@ with st.container():
 
                         # Update metadata with completion info
                         meta["finished_time"] = datetime.now().isoformat()
-                        meta["num_files"] = len(rendered_files) if mode == "still" else 1 if mp4_file else 0
+                        meta["num_files"] = len(rendered_files)
                         # Calculate render time in seconds
                         created_time = datetime.fromisoformat(meta["created_time"])
                         finished_time = datetime.fromisoformat(meta["finished_time"])
@@ -197,15 +197,18 @@ with st.container():
                                         mime="image/png",
                                     )
                         else:  # Animation mode
-                            if mp4_file:
-                                st.video(str(mp4_file))
+                            if rendered_files:
+                                # Get the first (and only) video pair
+                                src_vid, mkv_vid = rendered_files[0]
+                                # Display the video
+                                st.video(str(mkv_vid))
                                 # Add download button for the video
-                                with open(mp4_file, "rb") as f:
+                                with open(mkv_vid, "rb") as f:
                                     st.download_button(
                                         label="Download Animation",
                                         data=f,
-                                        file_name=mp4_file.name,
-                                        mime="video/mp4",
+                                        file_name=mkv_vid.name,
+                                        mime="video/x-matroska",
                                     )
 
                 except Exception as e:
