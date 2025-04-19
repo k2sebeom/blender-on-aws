@@ -44,5 +44,6 @@ resource "aws_instance" "blender_instance" {
   # Script to mount EFS
   user_data = templatefile("${path.module}/user_data.tpl", {
     efs_id             = aws_efs_file_system.blender_efs.id,
+    github_repo        = var.github_repo
   })
 }
