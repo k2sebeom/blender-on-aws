@@ -162,7 +162,11 @@ def main():
                     with col1:
                         st.metric("Rendered Files", stats["num_files"])
                     with col2:
-                        st.metric("Total Render Time", f"{stats['render_time']} min")
+                        # Convert seconds to minutes and seconds
+                        total_seconds = int(stats['render_time'])
+                        minutes = total_seconds // 60
+                        seconds = total_seconds % 60
+                        st.metric("Total Render Time", f"{minutes} min {seconds} sec")
 
                     # Get and display run details
                     source_files, render_files = workspace_service.get_run_details(
