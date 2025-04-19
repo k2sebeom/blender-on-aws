@@ -185,8 +185,8 @@ with st.container():
                         st.subheader("📥 Rendered Files")
                         cols = st.columns(3)
                         for idx, render_file in enumerate(rendered_files):
-                            # Read the PNG file
-                            with open(render_file, "rb") as f:
+                            # Read the static file
+                            with open(render_file[0], "rb") as f:
                                 image_bytes = f.read()
 
                             # Display the image in the appropriate column
