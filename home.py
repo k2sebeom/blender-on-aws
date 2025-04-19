@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_extras.stateful_button import button
 import argparse
 
 from src.config.config_loader import ConfigLoader
@@ -122,17 +121,23 @@ with st.container():
                     st.error("Invalid frame number")
                     is_valid = False
 
+        if "render_button" not in st.session_state:
+            st.session_state.is_rendering = False
+
+        def set_render_state(state: bool):
+            st.session_state.is_rendering = state
+
         # Submit button - disabled while rendering
         if (
-            button(
+            st.button(
                 "Start Rendering",
                 key="render_button",
+                on_click=set_render_state,
+                args=(True,),
                 disabled=st.session_state.is_rendering,
             )
             and is_valid
         ):
-            # Set rendering state to True
-            st.session_state.is_rendering = True
             # Display confirmed settings
             st.info(f"""
             Rendering with the following settings:
@@ -211,9 +216,7 @@ with st.container():
                 except Exception as e:
                     st.error(f"Error processing file: {e}")
                     st.stop()
-                finally:
-                    # Reset rendering state
-                    st.session_state.is_rendering = False
+
 
 # Footer
 st.markdown("---")
