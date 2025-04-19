@@ -160,23 +160,24 @@ def main(config):
                             )
                             st.success("Rendering completed successfully!")
 
-                            # Display rendered images
+                            # Display rendered images in a 3-column grid
                             st.subheader("📥 Rendered Files")
+                            cols = st.columns(3)
                             for idx, render_file in enumerate(rendered_files):
                                 # Read the PNG file
                                 with open(render_file, "rb") as f:
                                     image_bytes = f.read()
 
-                                # Display the image
-                                st.image(image_bytes, caption=f"Frame {idx + 1}")
-
-                                # Add download button for each frame
-                                st.download_button(
-                                    label=f"Download Frame {idx + 1}",
-                                    data=image_bytes,
-                                    file_name=render_file.name,
-                                    mime="image/png",
-                                )
+                                # Display the image in the appropriate column
+                                with cols[idx % 3]:
+                                    st.image(image_bytes, caption=f"Frame {idx + 1}", use_column_width=True)
+                                    # Add download button for each frame
+                                    st.download_button(
+                                        label=f"Download Frame {idx + 1}",
+                                        data=image_bytes,
+                                        file_name=render_file.name,
+                                        mime="image/png",
+                                    )
 
                     except Exception as e:
                         st.error(f"Error processing file: {e}")
