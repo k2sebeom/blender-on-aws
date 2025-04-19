@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from src.config.config_loader import ConfigLoader
 from src.services.workspace_service import WorkspaceService
 import argparse
@@ -67,13 +68,7 @@ def main():
         jobs, total_pages = workspace_service.get_paginated_jobs(st.session_state.page)
         
         if jobs:
-            # Create a table header
-            st.markdown("""
-            | Job Name | Created At | Number of Runs |
-            |----------|------------|----------------|
-            """)
-            
-            # Add table rows with clickable job names
+            # Create buttons for job selection
             for job in jobs:
                 if st.button(
                     job["name"],
@@ -82,9 +77,19 @@ def main():
                     use_container_width=True
                 ):
                     st.session_state.selected_job = job["name"]
-                st.markdown(f"""
-                | {job['name']} | {job['created_at']} | {job['num_runs']} |
-                """)
+            
+            # Create DataFrame and display table
+            df = pd.DataFrame(
+                [
+                    {
+                        "Job Name": job["name"],
+                        "Created At": job["created_at"],
+                        "Number of Runs": job["num_runs"]
+                    }
+                    for job in jobs
+                ]
+            )
+            st.table(df)
             
             # Pagination controls
             cols = st.columns(4)
@@ -93,13 +98,13 @@ def main():
                     st.session_state.page = 1
                     st.rerun()
             with cols[1]:
-                if st.button("◀️ Previous", disabled=st.session_state.page == 1):
+                if st.button("◀️", disabled=st.session_state.page == 1):
                     st.session_state.page -= 1
                     st.rerun()
             with cols[2]:
                 st.write(f"Page {st.session_state.page} of {total_pages}")
             with cols[3]:
-                if st.button("Next ▶️", disabled=st.session_state.page == total_pages):
+                if st.button("▶️", disabled=st.session_state.page == total_pages):
                     st.session_state.page += 1
                     st.rerun()
         else:
