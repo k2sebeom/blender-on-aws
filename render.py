@@ -32,11 +32,23 @@ with st.container():
     job_name = st.text_input(
         "Job Name", placeholder="Enter a name for your rendering job"
     )
-    frames_input = st.text_input(
-        "Frame Range",
-        placeholder="Single number (e.g., 1) or range (e.g., 1-100)",
-        value=1,
+    
+    # Render mode selection
+    render_mode = st.radio(
+        "Render Mode",
+        options=["Still Frame", "Animation"],
+        horizontal=True
     )
+    
+    # Frame inputs based on mode
+    if render_mode == "Still Frame":
+        frame_number = st.number_input("Frame Number", min_value=1, value=1)
+    else:  # Animation mode
+        col1, col2 = st.columns(2)
+        with col1:
+            start_frame = st.number_input("Start Frame", min_value=1, value=1)
+        with col2:
+            end_frame = st.number_input("End Frame", min_value=start_frame, value=None)
 
     st.subheader("📤 Upload Your File")
     uploaded_file = st.file_uploader("Choose a .blend file", type=["blend"])
@@ -47,23 +59,6 @@ with st.container():
         if not job_name:
             st.error("Please enter a job name")
             is_valid = False
-
-        if not frames_input:
-            st.error("Please enter frame range")
-            is_valid = False
-        else:
-            # Validate frame range format
-            try:
-                for frame in map(int, frames_input.replace("..", ",").split(",")):
-                    if frame < 1:
-                        st.error("Frame number must be positive")
-                        is_valid = False
-                        break
-            except ValueError:
-                st.error(
-                    "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
-                )
-                is_valid = False
 
         if "render_button" not in st.session_state:
             st.session_state.is_rendering = False
@@ -83,11 +78,19 @@ with st.container():
             and is_valid
         ):
             # Display confirmed settings
-            st.info(f"""
+            settings_info = f"""
             Rendering with the following settings:
             - Job Name: {job_name}
-            - Frames: {frames_input}
-            """)
+            - Mode: {render_mode}"""
+            
+            if render_mode == "Still Frame":
+                settings_info += f"\n            - Frame: {frame_number}"
+            else:
+                settings_info += f"\n            - Start Frame: {start_frame}"
+                if end_frame:
+                    settings_info += f"\n            - End Frame: {end_frame}"
+                
+            st.info(settings_info)
 
             # Create job and run directories, store the file
             with st.spinner("Processing your file..."):
@@ -101,12 +104,18 @@ with st.container():
                     # Create initial metadata
                     meta = {
                         "created_time": datetime.now().isoformat(),
-                        "frames": frames_input,
+                        "mode": render_mode,
                         "source_file": uploaded_file.name,
                         "finished_time": None,
                         "num_files": 0,
                         "render_time": 0,
                     }
+                    
+                    if render_mode == "Still Frame":
+                        meta["frame"] = frame_number
+                    else:
+                        meta["start_frame"] = start_frame
+                        meta["end_frame"] = end_frame
 
                     # Write initial metadata
                     with open(run_dir / "meta.json", "w") as f:
@@ -128,9 +137,14 @@ with st.container():
                         )
 
                         # Render the file and get outputs
+                        mode = "still" if render_mode == "Still Frame" else "anim"
                         rendered_files, stdout, stderr = (
                             blender_service.render_blend_file(
-                                stored_file, run_dir, frames_input
+                                stored_file, 
+                                run_dir,
+                                mode=mode,
+                                start_frame=frame_number if mode == "still" else start_frame,
+                                end_frame=None if mode == "still" else end_frame
                             )
                         )
 

@@ -160,13 +160,11 @@ def main():
                         for idx, (jpg_file, png_file) in enumerate(render_files):
                             with cols[idx % 3]:  # Distribute across 3 columns
                                 # Display compressed JPG
-                                with open(jpg_file, "rb") as f:
-                                    jpg_bytes = f.read()
-                                    st.image(
-                                        jpg_bytes,
-                                        caption=png_file.name,  # Show original PNG name
-                                        use_container_width=True,
-                                    )
+                                st.image(
+                                    jpg_file,
+                                    caption=png_file.name,  # Show original PNG name
+                                    use_container_width=True,
+                                )
                                 # Provide download link for original PNG
                                 with open(png_file, "rb") as f:
                                     png_bytes = f.read()

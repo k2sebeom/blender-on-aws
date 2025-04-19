@@ -16,14 +16,16 @@ class BlenderService:
         self.workspace_root = workspace_root
         self.ffmpeg_service = FFmpegService()
     
-    def render_blend_file(self, blend_file: Path, run_dir: Path, frame_range: str) -> tuple[List[Tuple[Path, Path]], str, str]:
+    def render_blend_file(self, blend_file: Path, run_dir: Path, mode: str = "still", start_frame: int = 1, end_frame: int = None) -> tuple[List[Tuple[Path, Path]], str, str]:
         """
         Create render directory and execute blender render command.
         
         Args:
             blend_file (Path): Path to the .blend file
             run_dir (Path): Path to the run directory
-            frame_range (str): Frame range to render
+            mode (str): Render mode - either "still" or "anim"
+            start_frame (int): Start frame number (default: 1)
+            end_frame (int): End frame number for animation mode (default: None)
             
         Returns:
             tuple[List[Path], str, str]: Tuple containing:
@@ -38,7 +40,7 @@ class BlenderService:
         # Prepare render output path template
         output_template = str(render_dir / "######")
         
-        # Construct and execute blender command
+        # Base command
         cmd = [
             "blender",
             "-b",  # background mode
@@ -48,8 +50,16 @@ class BlenderService:
             "--scene", "Scene",
             "--render-output", output_template,
             "--render-format", "PNG",
-            "--render-frame", frame_range.replace(' ', ''),
         ]
+
+        # Add mode-specific arguments
+        if mode == "still":
+            cmd.extend(["-f", str(start_frame)])
+        else:  # anim mode
+            cmd.extend(["-s", str(start_frame)])
+            if end_frame is not None:
+                cmd.extend(["-e", str(end_frame)])
+            cmd.append("-a")
         
         try:
             process = subprocess.run(cmd, check=True, capture_output=True, text=True)
