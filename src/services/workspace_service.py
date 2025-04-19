@@ -192,9 +192,9 @@ class WorkspaceService:
         if render_dir.exists() and static_dir.exists():
             src_files = sorted(render_dir.glob('*'))
             for src_file in src_files:
-                static_file = static_dir / f"{src_file.stem}.*"
-                if static_file.exists():
-                    render_pairs.append((static_file, src_file))
+                static_files = static_dir.glob(f"{src_file.stem}.*")
+                if static_files:
+                    render_pairs.append((next(static_files), src_file))
 
         return (source_files, render_pairs)
 
