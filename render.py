@@ -138,7 +138,7 @@ with st.container():
 
                         # Render the file and get outputs
                         mode = "still" if render_mode == "Still Frame" else "anim"
-                        rendered_files, stdout, stderr = (
+                        rendered_files, mp4_file, stdout, stderr = (
                             blender_service.render_blend_file(
                                 stored_file, 
                                 run_dir,
@@ -150,7 +150,7 @@ with st.container():
 
                         # Update metadata with completion info
                         meta["finished_time"] = datetime.now().isoformat()
-                        meta["num_files"] = len(rendered_files)
+                        meta["num_files"] = len(rendered_files) if mode == "still" else 1 if mp4_file else 0
                         # Calculate render time in seconds
                         created_time = datetime.fromisoformat(meta["created_time"])
                         finished_time = datetime.fromisoformat(meta["finished_time"])
@@ -172,28 +172,41 @@ with st.container():
                             with tab2:
                                 st.text_area("stderr", value=stderr, height=300)
 
-                        # Display rendered images in a 3-column grid
+                        # Display rendered output
                         st.subheader("📥 Rendered Files")
-                        cols = st.columns(3)
-                        for idx, (jpg_file, png_file) in enumerate(rendered_files):
-                            # Read the render file
-                            with open(png_file, "rb") as f:
-                                image_bytes = f.read()
+                        if mode == "still":
+                            # Display rendered images in a 3-column grid
+                            cols = st.columns(3)
+                            for idx, (jpg_file, png_file) in enumerate(rendered_files):
+                                # Read the render file
+                                with open(png_file, "rb") as f:
+                                    image_bytes = f.read()
 
-                            # Display the image in the appropriate column
-                            with cols[idx % 3]:
-                                st.image(
-                                    jpg_file,
-                                    caption=f"Frame {idx + 1}",
-                                    use_container_width=True,
-                                )
-                                # Add download button for each frame
-                                st.download_button(
-                                    label=f"Download Frame {idx + 1}",
-                                    data=image_bytes,
-                                    file_name=png_file.name,
-                                    mime="image/png",
-                                )
+                                # Display the image in the appropriate column
+                                with cols[idx % 3]:
+                                    st.image(
+                                        jpg_file,
+                                        caption=f"Frame {idx + 1}",
+                                        use_container_width=True,
+                                    )
+                                    # Add download button for each frame
+                                    st.download_button(
+                                        label=f"Download Frame {idx + 1}",
+                                        data=image_bytes,
+                                        file_name=png_file.name,
+                                        mime="image/png",
+                                    )
+                        else:  # Animation mode
+                            if mp4_file:
+                                st.video(str(mp4_file))
+                                # Add download button for the video
+                                with open(mp4_file, "rb") as f:
+                                    st.download_button(
+                                        label="Download Animation",
+                                        data=f,
+                                        file_name=mp4_file.name,
+                                        mime="video/mp4",
+                                    )
 
                 except Exception as e:
                     st.error(f"Error processing file: {e}")

@@ -130,7 +130,7 @@ def main():
                         st.metric("Total Render Time", f"{minutes} min {seconds} sec")
 
                     # Get and display run details
-                    source_files, render_files = workspace_service.get_run_details(
+                    source_files, render_files, mp4_file = workspace_service.get_run_details(
                         st.session_state.selected_job, selected_run
                     )
 
@@ -150,9 +150,19 @@ def main():
                                         mime="application/octet-stream",
                                     )
 
-                    # Display render outputs in 3 columns
-                    if render_files:
-                        st.markdown("### Render Outputs")
+                    # Display render outputs
+                    st.markdown("### Render Outputs")
+                    if mp4_file:  # Animation output
+                        st.video(str(mp4_file))
+                        # Add download button for the video
+                        with open(mp4_file, "rb") as f:
+                            st.download_button(
+                                label="Download Animation",
+                                data=f,
+                                file_name=mp4_file.name,
+                                mime="video/mp4",
+                            )
+                    elif render_files:  # Still image outputs
                         # Create 3 columns for the grid
                         cols = st.columns(3)
 
