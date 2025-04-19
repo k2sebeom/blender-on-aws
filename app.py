@@ -1,19 +1,19 @@
 import streamlit as st
 from streamlit_extras.stateful_button import button
-import os
-from datetime import datetime
 import time
 import argparse
-from pathlib import Path
 
 from src.config.config_loader import ConfigLoader
 from src.services.workspace_service import WorkspaceService
 
 # Parse command line arguments
-parser = argparse.ArgumentParser(description='Blender Online Renderer')
-parser.add_argument('-c', '--config', 
-                    default='config.yaml',
-                    help='Path to config file (default: config.yaml)')
+parser = argparse.ArgumentParser(description="Blender Online Renderer")
+parser.add_argument(
+    "-c",
+    "--config",
+    default="config.yaml",
+    help="Path to config file (default: config.yaml)",
+)
 args = parser.parse_args()
 
 # Load configuration
@@ -23,18 +23,17 @@ config = ConfigLoader.load_config(args.config)
 if config:
     workspace_service = WorkspaceService(config)
     if not workspace_service.initialize_workspace():
-        st.error("Failed to initialize workspace. Please check the configuration and permissions.")
+        st.error(
+            "Failed to initialize workspace. Please check the configuration and permissions."
+        )
         st.stop()
 
 # Set page config
-st.set_page_config(
-    page_title="Blender Online Renderer",
-    page_icon="🎨",
-    layout="wide"
-)
+st.set_page_config(page_title="Blender Online Renderer", page_icon="🎨", layout="wide")
 
 # Add custom CSS
-st.markdown("""
+st.markdown(
+    """
     <style>
     .main {
         padding: 2rem;
@@ -56,7 +55,10 @@ st.markdown("""
         color: #721c24;
     }
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 def main(config):
     # Header
@@ -66,36 +68,48 @@ def main(config):
     # File upload section
     with st.container():
         # Display max file size from config
-        if config and 'workspace' in config and 'max_upload_size' in config['workspace']:
+        if (
+            config
+            and "workspace" in config
+            and "max_upload_size" in config["workspace"]
+        ):
             st.info(f"Maximum upload size: {config['workspace']['max_upload_size']} MB")
 
         # Configuration inputs
-        job_name = st.text_input("Job Name", placeholder="Enter a name for your rendering job")
-        frames_input = st.text_input("Frame Range", placeholder="Single number (e.g., 1) or range (e.g., 1-100)", value=1)
+        job_name = st.text_input(
+            "Job Name", placeholder="Enter a name for your rendering job"
+        )
+        frames_input = st.text_input(
+            "Frame Range",
+            placeholder="Single number (e.g., 1) or range (e.g., 1-100)",
+            value=1,
+        )
 
         st.subheader("📤 Upload Your File")
-        uploaded_file = st.file_uploader("Choose a .blend file", type=['blend'])
-        
+        uploaded_file = st.file_uploader("Choose a .blend file", type=["blend"])
+
         if uploaded_file:
             # Validate inputs
             is_valid = True
             if not job_name:
                 st.error("Please enter a job name")
                 is_valid = False
-                
+
             if not frames_input:
                 st.error("Please enter frame range")
                 is_valid = False
             else:
                 # Validate frame range format
-                if '-' in frames_input:
+                if "-" in frames_input:
                     try:
-                        start, end = map(int, frames_input.split('-'))
+                        start, end = map(int, frames_input.split("-"))
                         if start >= end:
                             st.error("Start frame must be less than end frame")
                             is_valid = False
                     except ValueError:
-                        st.error("Invalid frame range format. Use either a single number or start-end format")
+                        st.error(
+                            "Invalid frame range format. Use either a single number or start-end format"
+                        )
                         is_valid = False
                 else:
                     try:
@@ -106,7 +120,7 @@ def main(config):
                     except ValueError:
                         st.error("Invalid frame number")
                         is_valid = False
-            
+
             # Submit button
             if button("Start Rendering", key="render_button") and is_valid:
                 # Display confirmed settings
@@ -115,22 +129,24 @@ def main(config):
                 - Job Name: {job_name}
                 - Frames: {frames_input}
                 """)
-                
+
                 # Save file temporarily
                 with st.spinner("Processing your file..."):
                     # Simulate file processing
                     progress_bar = st.progress(0)
                     status_text = st.empty()
-                    
+
                     # Simulate rendering progress
                     for i in range(100):
-                        time.sleep(0.1)  # This will be replaced with actual rendering progress
+                        time.sleep(
+                            0.1
+                        )  # This will be replaced with actual rendering progress
                         progress_bar.progress(i + 1)
-                        status_text.text(f"Rendering: {i+1}%")
-                    
+                        status_text.text(f"Rendering: {i + 1}%")
+
                     # Show success message
                     st.success("Rendering completed successfully!")
-                    
+
                     # Download section
                     st.subheader("📥 Download Result")
                     st.markdown("""
@@ -143,14 +159,14 @@ def main(config):
                         label="Download Rendered File",
                         data=b"placeholder",  # This will be replaced with actual file data
                         file_name="rendered_result.png",
-                        mime="image/png"
+                        mime="image/png",
                     )
 
     # Job History Section
     with st.container():
         st.subheader("📋 Recent Jobs")
         col1, col2, col3 = st.columns(3)
-        
+
         # Sample job history (will be replaced with actual job tracking)
         with col1:
             st.metric("Active Jobs", "0")
@@ -162,6 +178,7 @@ def main(config):
     # Footer
     st.markdown("---")
     st.markdown("Made with ❤️ using Streamlit")
+
 
 if __name__ == "__main__":
     main(config)
