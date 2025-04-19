@@ -35,10 +35,8 @@ class WorkspaceService:
             
             # Copy scripts folder to workspace root
             scripts_dir = Path('scripts')
-            if scripts_dir.exists():
-                workspace_scripts_dir = self.workspace_root / 'scripts'
-                if workspace_scripts_dir.exists():
-                    shutil.rmtree(workspace_scripts_dir)
+            workspace_scripts_dir = self.workspace_root / 'scripts'
+            if scripts_dir.exists() and not workspace_scripts_dir.exists():
                 shutil.copytree(scripts_dir, workspace_scripts_dir)
 
             return True    
