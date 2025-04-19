@@ -130,13 +130,33 @@ def main(config):
                 - Frames: {frames_input}
                 """)
 
-                # Save file temporarily
+                # Create job and run directories, store the file
                 with st.spinner("Processing your file..."):
-                    # Simulate file processing
+                    try:
+                        # Create job directory
+                        job_dir = workspace_service.create_job_directory(job_name)
+                        
+                        # Create run directory with timestamp
+                        run_dir = workspace_service.create_run_directory(job_dir)
+                        
+                        # Store the uploaded file
+                        file_bytes = uploaded_file.getvalue()
+                        stored_file = workspace_service.store_uploaded_file(
+                            file_bytes, 
+                            uploaded_file.name, 
+                            run_dir
+                        )
+                        
+                        st.success(f"File stored successfully at: {stored_file}")
+                    except Exception as e:
+                        st.error(f"Error processing file: {e}")
+                        st.stop()
+
+                    # Show progress bar for rendering
                     progress_bar = st.progress(0)
                     status_text = st.empty()
 
-                    # Simulate rendering progress
+                    # Simulate rendering progress (will be replaced with actual rendering)
                     for i in range(100):
                         time.sleep(
                             0.1
