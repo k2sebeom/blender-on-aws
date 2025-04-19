@@ -236,6 +236,7 @@ class WorkspaceService:
             job_dir = self.workspace_root / 'jobs' / job_name
             if job_dir.exists():
                 shutil.rmtree(job_dir)
+            st.error(f"{job_dir} does not exist")
             return True
         except Exception as e:
             st.error(f"Error deleting job: {e}")
