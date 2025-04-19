@@ -3,8 +3,7 @@ from typing import Dict
 from datetime import datetime
 import streamlit as st
 import shutil
-import os
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 
 class WorkspaceService:
     """Service class to handle workspace-related operations."""

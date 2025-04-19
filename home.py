@@ -7,11 +7,11 @@ from src.services.workspace_service import WorkspaceService
 from src.services.blender_service import BlenderService
 
 # Initialize session state for render logs
-if 'stdout' not in st.session_state:
+if "stdout" not in st.session_state:
     st.session_state.stdout = ""
-if 'stderr' not in st.session_state:
+if "stderr" not in st.session_state:
     st.session_state.stderr = ""
-if 'is_rendering' not in st.session_state:
+if "is_rendering" not in st.session_state:
     st.session_state.is_rendering = False
 
 # Parse command line arguments
@@ -66,16 +66,14 @@ st.markdown(
 
 # Header
 st.title("🎨 Render")
-st.markdown("Upload your .blend file and we'll render it for you! View job history in the sidebar.")
+st.markdown(
+    "Upload your .blend file and we'll render it for you! View job history in the sidebar."
+)
 
 # File upload section
 with st.container():
     # Display max file size from config
-    if (
-        config
-        and "workspace" in config
-        and "max_upload_size" in config["workspace"]
-    ):
+    if config and "workspace" in config and "max_upload_size" in config["workspace"]:
         st.info(f"Maximum upload size: {config['workspace']['max_upload_size']} MB")
 
     # Configuration inputs
@@ -125,7 +123,14 @@ with st.container():
                     is_valid = False
 
         # Submit button - disabled while rendering
-        if button("Start Rendering", key="render_button", disabled=st.session_state.is_rendering) and is_valid:
+        if (
+            button(
+                "Start Rendering",
+                key="render_button",
+                disabled=st.session_state.is_rendering,
+            )
+            and is_valid
+        ):
             # Set rendering state to True
             st.session_state.is_rendering = True
             # Display confirmed settings
@@ -160,14 +165,16 @@ with st.container():
                         )
 
                         # Render the file and get outputs
-                        rendered_files, stdout, stderr = blender_service.render_blend_file(
-                            stored_file, run_dir, frames_input
+                        rendered_files, stdout, stderr = (
+                            blender_service.render_blend_file(
+                                stored_file, run_dir, frames_input
+                            )
                         )
-                        
+
                         # Store the logs in session state
                         st.session_state.stdout = stdout
                         st.session_state.stderr = stderr
-                        
+
                         st.success("Rendering completed successfully!")
 
                         # Show expandable section with stdout/stderr tabs
@@ -188,7 +195,11 @@ with st.container():
 
                             # Display the image in the appropriate column
                             with cols[idx % 3]:
-                                st.image(image_bytes, caption=f"Frame {idx + 1}", use_container_width=True)
+                                st.image(
+                                    image_bytes,
+                                    caption=f"Frame {idx + 1}",
+                                    use_container_width=True,
+                                )
                                 # Add download button for each frame
                                 st.download_button(
                                     label=f"Download Frame {idx + 1}",
