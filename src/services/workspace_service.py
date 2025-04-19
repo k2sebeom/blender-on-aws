@@ -4,6 +4,7 @@ from datetime import datetime
 import streamlit as st
 import subprocess
 import glob
+import shutil
 
 class WorkspaceService:
     """Service class to handle workspace-related operations."""
@@ -22,6 +23,7 @@ class WorkspaceService:
         """
         Initialize workspace directory structure.
         Creates the workspace root directory and required subdirectories.
+        Copies scripts folder to workspace root.
         
         Returns:
             bool: True if initialization successful, False otherwise
@@ -29,6 +31,14 @@ class WorkspaceService:
         try:
             # Create workspace root if it doesn't exist
             self.workspace_root.mkdir(parents=True, exist_ok=True)
+            
+            # Copy scripts folder to workspace root
+            scripts_dir = Path('scripts')
+            if scripts_dir.exists():
+                workspace_scripts_dir = self.workspace_root / 'scripts'
+                if workspace_scripts_dir.exists():
+                    shutil.rmtree(workspace_scripts_dir)
+                shutil.copytree(scripts_dir, workspace_scripts_dir)
 
             return True    
         except Exception as e:
