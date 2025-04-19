@@ -5,10 +5,10 @@ resource "aws_security_group" "blender_sg" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    from_port   = 8501
-    to_port     = 8501
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 8501
+    to_port         = 8501
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
   }
 
   egress {
