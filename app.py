@@ -193,7 +193,7 @@ def main(config):
 
                                 # Display the image in the appropriate column
                                 with cols[idx % 3]:
-                                    st.image(image_bytes, caption=f"Frame {idx + 1}", use_column_width=True)
+                                    st.image(image_bytes, caption=f"Frame {idx + 1}", use_container_width=True)
                                     # Add download button for each frame
                                     st.download_button(
                                         label=f"Download Frame {idx + 1}",
@@ -211,16 +211,65 @@ def main(config):
 
     # Job History Section
     with st.container():
-        st.subheader("📋 Recent Jobs")
+        st.subheader("📋 Job History")
+        
+        # Display job statistics
+        active_jobs, completed_today, avg_render_time = workspace_service.get_job_stats()
         col1, col2, col3 = st.columns(3)
-
-        # Sample job history (will be replaced with actual job tracking)
         with col1:
-            st.metric("Active Jobs", "0")
+            st.metric("Active Jobs", str(active_jobs))
         with col2:
-            st.metric("Completed Today", "0")
+            st.metric("Completed Today", str(completed_today))
         with col3:
-            st.metric("Average Render Time", "0 min")
+            st.metric("Average Render Time", f"{avg_render_time:.1f} min")
+
+        # Job list and details
+        jobs = workspace_service.get_all_jobs()
+        if jobs:
+            selected_job = st.selectbox("Select Job", jobs)
+            if selected_job:
+                runs = workspace_service.get_job_runs(selected_job)
+                if runs:
+                    selected_run = st.selectbox("Select Run", runs)
+                    if selected_run:
+                        # Get run details
+                        source_files, render_files = workspace_service.get_run_details(selected_job, selected_run)
+                        
+                        # Display source files
+                        if source_files:
+                            st.subheader("📁 Source Files")
+                            for src_file in source_files:
+                                col1, col2 = st.columns([3, 1])
+                                with col1:
+                                    st.text(src_file.name)
+                                with col2:
+                                    with open(src_file, "rb") as f:
+                                        st.download_button(
+                                            "Download",
+                                            f,
+                                            file_name=src_file.name,
+                                            mime="application/octet-stream"
+                                        )
+                        
+                        # Display render outputs in a grid
+                        if render_files:
+                            st.subheader("🖼️ Render Outputs")
+                            cols = st.columns(3)
+                            for idx, render_file in enumerate(render_files):
+                                with cols[idx % 3]:
+                                    # Read and display the image
+                                    with open(render_file, "rb") as f:
+                                        image_bytes = f.read()
+                                        st.image(image_bytes, caption=render_file.name, use_column_width=True)
+                                        # Add download button
+                                        st.download_button(
+                                            f"Download {render_file.name}",
+                                            image_bytes,
+                                            file_name=render_file.name,
+                                            mime="image/png"
+                                        )
+        else:
+            st.info("No jobs found. Upload a .blend file to start rendering!")
 
     # Footer
     st.markdown("---")
