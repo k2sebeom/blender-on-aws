@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 import subprocess
+from .ffmpeg_service import FFmpegService
 
 class BlenderService:
     """Service class to handle Blender-related operations."""
@@ -13,8 +14,9 @@ class BlenderService:
             workspace_root (Path): Path to workspace root directory
         """
         self.workspace_root = workspace_root
+        self.ffmpeg_service = FFmpegService()
     
-    def render_blend_file(self, blend_file: Path, run_dir: Path, frame_range: str) -> tuple[List[Path], str, str]:
+    def render_blend_file(self, blend_file: Path, run_dir: Path, frame_range: str) -> tuple[List[Tuple[Path, Path]], str, str]:
         """
         Create render directory and execute blender render command.
         
@@ -58,7 +60,10 @@ class BlenderService:
             if not rendered_files:
                 rendered_files = []
 
-            return rendered_files, process.stdout, process.stderr
+            # Compress rendered files to JPG format
+            compressed_pairs = self.ffmpeg_service.compress_images(rendered_files, run_dir)
+            
+            return compressed_pairs, process.stdout, process.stderr
             
         except subprocess.CalledProcessError as e:
             raise Exception(f"Blender render failed: {e.stderr}")

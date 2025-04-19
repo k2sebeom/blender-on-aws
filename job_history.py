@@ -191,20 +191,24 @@ def main():
                         # Create 3 columns for the grid
                         cols = st.columns(3)
                         
-                        # Display images across columns
-                        for idx, render_file in enumerate(render_files):
+                        # Display compressed JPGs with PNG download links
+                        for idx, (jpg_file, png_file) in enumerate(render_files):
                             with cols[idx % 3]:  # Distribute across 3 columns
-                                with open(render_file, "rb") as f:
-                                    image_bytes = f.read()
+                                # Display compressed JPG
+                                with open(jpg_file, "rb") as f:
+                                    jpg_bytes = f.read()
                                     st.image(
-                                        image_bytes,
-                                        caption=render_file.name,
+                                        jpg_bytes,
+                                        caption=png_file.name,  # Show original PNG name
                                         use_container_width=True,
                                     )
+                                # Provide download link for original PNG
+                                with open(png_file, "rb") as f:
+                                    png_bytes = f.read()
                                     st.download_button(
-                                        f"Download {render_file.name}",
-                                        image_bytes,
-                                        file_name=render_file.name,
+                                        f"Download {png_file.name}",
+                                        png_bytes,
+                                        file_name=png_file.name,
                                         mime="image/png",
                                     )
             else:

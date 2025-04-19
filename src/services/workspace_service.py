@@ -199,7 +199,7 @@ class WorkspaceService:
 
         return (active_jobs, completed_today, avg_render_time)
 
-    def get_run_details(self, job_name: str, run_id: str) -> Tuple[List[Path], List[Path]]:
+    def get_run_details(self, job_name: str, run_id: str) -> Tuple[List[Path], List[Tuple[Path, Path]]]:
         """
         Get source files and render outputs for a specific run.
         
@@ -208,7 +208,7 @@ class WorkspaceService:
             run_id (str): Run timestamp
             
         Returns:
-            Tuple[List[Path], List[Path]]: (source files, render outputs)
+            Tuple[List[Path], List[Tuple[Path, Path]]]: (source files, (compressed jpg, original png) pairs)
         """
         run_dir = self.workspace_root / 'jobs' / job_name / run_id
         if not run_dir.exists():
@@ -216,11 +216,20 @@ class WorkspaceService:
 
         src_dir = run_dir / "src"
         render_dir = run_dir / "render"
+        static_dir = run_dir / "static"
 
         source_files = list(src_dir.glob('*')) if src_dir.exists() else []
-        render_files = list(render_dir.glob('*.png')) if render_dir.exists() else []
+        
+        # Get both compressed and original files
+        render_pairs = []
+        if render_dir.exists() and static_dir.exists():
+            png_files = sorted(render_dir.glob('*.png'))
+            for png_file in png_files:
+                jpg_file = static_dir / f"{png_file.stem}.jpg"
+                if jpg_file.exists():
+                    render_pairs.append((jpg_file, png_file))
 
-        return (source_files, render_files)
+        return (source_files, render_pairs)
 
     def delete_job(self, job_name: str) -> bool:
         """
