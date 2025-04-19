@@ -46,7 +46,7 @@ class BlenderService:
             "--scene", "Scene",
             "--render-output", output_template,
             "--render-format", "PNG",
-            "--render-frame", f'"{frame_range}"',
+            "--render-frame", frame_range.replace(' ', ''),
         ]
         
         try:
