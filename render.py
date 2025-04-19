@@ -64,22 +64,23 @@ with st.container():
             st.error("Please enter a job name")
             is_valid = False
 
-        if not frames_input:
-            st.error("Please enter frame range")
-            is_valid = False
-        else:
-            # Validate frame range format
-            try:
-                for frame in map(int, frames_input.replace("..", ",").split(",")):
-                    if frame < 1:
-                        st.error("Frame number must be positive")
-                        is_valid = False
-                        break
-            except ValueError:
-                st.error(
-                    "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
-                )
+        if render_mode == "Still Frame":
+            if not frames_input:
+                st.error("Please enter frame range")
                 is_valid = False
+            else:
+                # Validate frame range format
+                try:
+                    for frame in map(int, frames_input.replace("..", ",").split(",")):
+                        if frame < 1:
+                            st.error("Frame number must be positive")
+                            is_valid = False
+                            break
+                except ValueError:
+                    st.error(
+                        "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
+                    )
+                    is_valid = False
 
         if "render_button" not in st.session_state:
             st.session_state.is_rendering = False
