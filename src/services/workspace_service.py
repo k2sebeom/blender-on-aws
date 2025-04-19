@@ -222,6 +222,25 @@ class WorkspaceService:
 
         return (source_files, render_files)
 
+    def delete_job(self, job_name: str) -> bool:
+        """
+        Delete a job and its directory.
+        
+        Args:
+            job_name (str): Name of the job to delete
+            
+        Returns:
+            bool: True if deletion successful, False otherwise
+        """
+        try:
+            job_dir = self.workspace_root / 'jobs' / job_name
+            if job_dir.exists():
+                shutil.rmtree(job_dir)
+            return True
+        except Exception as e:
+            st.error(f"Error deleting job: {e}")
+            return False
+
     def get_run_stats(self, job_name: str, run_id: str) -> Dict:
         """
         Get statistics for a specific run.
