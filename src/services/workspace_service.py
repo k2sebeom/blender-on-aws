@@ -129,6 +129,7 @@ class WorkspaceService:
             "-b",  # background mode
             "-y",  # yes to all
             str(blend_file),
+            "-P", str(self.workspace_root / "scripts" / "cycles.py"),  # Run GPU setup script
             "--scene", "Scene",
             "--render-output", output_template,
             "--render-format", "PNG",
