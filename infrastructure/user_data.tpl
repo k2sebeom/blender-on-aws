@@ -17,7 +17,7 @@ echo "${efs_id}:/ /mnt/efs efs defaults,_netdev 0 0" >> /etc/fstab
 
 # Install blender
 sudo snap install blender --classic
-sudo apt install -y libgl1-mesa-glx libxi6 libxrender1
+sudo apt install -y libgl1-mesa-glx libxi6 libxrender1 libegl1
 
 # Install ffmpeg
 sudo apt install -y ffmpeg
