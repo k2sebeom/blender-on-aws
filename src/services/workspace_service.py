@@ -279,7 +279,7 @@ class WorkspaceService:
 
         render_files = list(render_dir.glob('*.png'))
         num_files = len(render_files)
-
+        print(f"Run stat {render_dir}, {num_files}")
         # Calculate total render time
         if num_files > 0:
             dir_creation_time = datetime.fromtimestamp(run_dir.stat().st_ctime)
