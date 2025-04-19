@@ -185,14 +185,14 @@ with st.container():
                         st.subheader("📥 Rendered Files")
                         cols = st.columns(3)
                         for idx, (jpg_file, png_file) in enumerate(rendered_files):
-                            # Read the static file
-                            with open(jpg_file, "rb") as f:
+                            # Read the render file
+                            with open(png_file, "rb") as f:
                                 image_bytes = f.read()
 
                             # Display the image in the appropriate column
                             with cols[idx % 3]:
                                 st.image(
-                                    image_bytes,
+                                    jpg_file,
                                     caption=f"Frame {idx + 1}",
                                     use_container_width=True,
                                 )
