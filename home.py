@@ -102,13 +102,10 @@ with st.container():
             # Validate frame range format
             if "-" in frames_input:
                 try:
-                    start, end = map(int, frames_input.split("-"))
-                    if start >= end:
-                        st.error("Start frame must be less than end frame")
-                        is_valid = False
+                    map(int, frames_input.replace('..', ',').split(","))
                 except ValueError:
                     st.error(
-                        "Invalid frame range format. Use either a single number or start-end format"
+                        "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
                     )
                     is_valid = False
             else:
