@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import json
+from datetime import datetime
 from src.config.config_loader import ConfigLoader
 from src.services.workspace_service import WorkspaceService
 import argparse
@@ -151,22 +153,43 @@ def main():
                 )
 
                 if selected_run:
-                    # Get run statistics
-                    stats = workspace_service.get_run_stats(
-                        st.session_state.selected_job, selected_run
-                    )
-
-                    # Display run statistics
-                    st.markdown("### Run Statistics")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric("Rendered Files", stats["num_files"])
-                    with col2:
-                        # Convert seconds to minutes and seconds
-                        total_seconds = int(stats['render_time'])
-                        minutes = total_seconds // 60
-                        seconds = total_seconds % 60
-                        st.metric("Total Render Time", f"{minutes} min {seconds} sec")
+                    # Get run metadata
+                    run_dir = workspace_service.get_workspace_path() / 'jobs' / st.session_state.selected_job / selected_run
+                    meta_file = run_dir / "meta.json"
+                    
+                    if meta_file.exists():
+                        with open(meta_file) as f:
+                            meta = json.load(f)
+                            
+                        # Display run metadata
+                        st.markdown("### Run Statistics")
+                        
+                        # Create three columns for metadata
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.metric("Rendered Files", meta["num_files"])
+                        
+                        with col2:
+                            # Convert seconds to minutes and seconds
+                            total_seconds = int(meta["render_time"])
+                            minutes = total_seconds // 60
+                            seconds = total_seconds % 60
+                            st.metric("Total Render Time", f"{minutes} min {seconds} sec")
+                            
+                        with col3:
+                            st.metric("Frame Range", meta["frames"])
+                            
+                        # Display timestamps in a more readable format
+                        st.markdown("### Run Timeline")
+                        created = datetime.fromisoformat(meta["created_time"]).strftime("%Y-%m-%d %H:%M:%S")
+                        finished = datetime.fromisoformat(meta["finished_time"]).strftime("%Y-%m-%d %H:%M:%S")
+                        st.write(f"**Started:** {created}")
+                        st.write(f"**Finished:** {finished}")
+                        
+                        # Display source file info
+                        st.markdown("### Source File")
+                        st.write(f"**Filename:** {meta['source_file']}")
 
                     # Get and display run details
                     source_files, render_files = workspace_service.get_run_details(
