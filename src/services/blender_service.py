@@ -56,8 +56,8 @@ class BlenderService:
             rendered_files = sorted(Path(render_dir).glob("*.png"))
             
             if not rendered_files:
-                raise Exception("No rendered files found")
-                
+                rendered_files = []
+
             return rendered_files, process.stdout, process.stderr
             
         except subprocess.CalledProcessError as e:
