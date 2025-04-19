@@ -158,26 +158,25 @@ def main():
                         is_animation = stats.get("mode") == "Animation"
                         
                         if is_animation:
-                            cols = st.columns(2)
                             # For animation, just get mp4 file
                             mp4_file = render_files[0][1]
-                            with cols[0]:
-                                st.video(str(mp4_file))
-                                # Add download button for the video
-                                with open(mp4_file, "rb") as f:
-                                    st.download_button(
-                                        label="Download Animation",
-                                        data=f,
-                                        file_name=mp4_file.name,
-                                        mime="video/mp4",
-                                    )
+
+                            st.video(str(mp4_file))
+                            # Add download button for the video
+                            with open(mp4_file, "rb") as f:
+                                st.download_button(
+                                    label="Download Animation",
+                                    data=f,
+                                    file_name=mp4_file.name,
+                                    mime="video/mp4",
+                                )
                         else:  # Still image outputs
                             # Create 3 columns for the grid
-                            cols = st.columns(3)
+                            cols = st.columns(2)
 
                             # Display compressed JPGs with PNG download links
                             for idx, (jpg_file, png_file) in enumerate(render_files):
-                                with cols[idx % 3]:  # Distribute across 3 columns
+                                with cols[idx % 2]:  # Distribute across 3 columns
                                     # Display compressed JPG
                                     st.image(
                                         jpg_file,
