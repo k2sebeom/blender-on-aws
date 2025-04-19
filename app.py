@@ -4,17 +4,10 @@ import os
 from datetime import datetime
 import time
 import argparse
-import yaml
 from pathlib import Path
 
-def load_config(config_path):
-    """Load configuration from YAML file."""
-    try:
-        with open(config_path, 'r') as f:
-            return yaml.safe_load(f)
-    except Exception as e:
-        st.error(f"Error loading config file: {e}")
-        return None
+from src.config.config_loader import ConfigLoader
+from src.services.workspace_service import WorkspaceService
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Blender Online Renderer')
@@ -24,7 +17,14 @@ parser.add_argument('-c', '--config',
 args = parser.parse_args()
 
 # Load configuration
-config = load_config(args.config)
+config = ConfigLoader.load_config(args.config)
+
+# Initialize workspace
+if config:
+    workspace_service = WorkspaceService(config)
+    if not workspace_service.initialize_workspace():
+        st.error("Failed to initialize workspace. Please check the configuration and permissions.")
+        st.stop()
 
 # Set page config
 st.set_page_config(
@@ -62,12 +62,6 @@ def main(config):
     # Header
     st.title("🎨 Blender Online Renderer")
     st.markdown("Upload your .blend file and we'll render it for you!")
-
-    # Create workspace directories if they don't exist
-    if config and 'workspace' in config:
-        for dir_name in ['upload_dir', 'output_dir', 'temp_dir']:
-            if dir_name in config['workspace']:
-                Path(config['workspace'][dir_name]).mkdir(parents=True, exist_ok=True)
 
     # File upload section
     with st.container():
