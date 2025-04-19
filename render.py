@@ -184,9 +184,9 @@ with st.container():
                         # Display rendered images in a 3-column grid
                         st.subheader("📥 Rendered Files")
                         cols = st.columns(3)
-                        for idx, render_file in enumerate(rendered_files):
+                        for idx, (jpg_file, png_file) in enumerate(rendered_files):
                             # Read the static file
-                            with open(render_file[0], "rb") as f:
+                            with open(jpg_file, "rb") as f:
                                 image_bytes = f.read()
 
                             # Display the image in the appropriate column
@@ -200,7 +200,7 @@ with st.container():
                                 st.download_button(
                                     label=f"Download Frame {idx + 1}",
                                     data=image_bytes,
-                                    file_name=render_file.name,
+                                    file_name=png_file.name,
                                     mime="image/png",
                                 )
 
