@@ -1,10 +1,10 @@
 import streamlit as st
 from streamlit_extras.stateful_button import button
-import time
 import argparse
 
 from src.config.config_loader import ConfigLoader
 from src.services.workspace_service import WorkspaceService
+from src.services.blender_service import BlenderService
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Blender Online Renderer")
@@ -135,39 +135,41 @@ def main(config):
                     try:
                         # Create job directory
                         job_dir = workspace_service.create_job_directory(job_name)
-                        
+
                         # Create run directory with timestamp
                         run_dir = workspace_service.create_run_directory(job_dir)
-                        
+
                         # Store the uploaded file
                         file_bytes = uploaded_file.getvalue()
                         stored_file = workspace_service.store_uploaded_file(
-                            file_bytes, 
-                            uploaded_file.name, 
-                            run_dir
+                            file_bytes, uploaded_file.name, run_dir
                         )
-                        
+
                         st.success(f"File stored successfully at: {stored_file}")
-                        
+
                         # Start rendering process
                         with st.spinner("Rendering your file..."):
-                            rendered_files = workspace_service.render_blend_file(
-                                stored_file,
-                                run_dir,
-                                frames_input
+                            # Initialize blender service
+                            blender_service = BlenderService(
+                                workspace_service.get_workspace_path()
+                            )
+
+                            # Render the file
+                            rendered_files = blender_service.render_blend_file(
+                                stored_file, run_dir, frames_input
                             )
                             st.success("Rendering completed successfully!")
-                            
+
                             # Display rendered images
                             st.subheader("📥 Rendered Files")
                             for idx, render_file in enumerate(rendered_files):
                                 # Read the PNG file
                                 with open(render_file, "rb") as f:
                                     image_bytes = f.read()
-                                
+
                                 # Display the image
                                 st.image(image_bytes, caption=f"Frame {idx + 1}")
-                                
+
                                 # Add download button for each frame
                                 st.download_button(
                                     label=f"Download Frame {idx + 1}",
@@ -175,7 +177,7 @@ def main(config):
                                     file_name=render_file.name,
                                     mime="image/png",
                                 )
-                                
+
                     except Exception as e:
                         st.error(f"Error processing file: {e}")
                         st.stop()
