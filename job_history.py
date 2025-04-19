@@ -127,13 +127,16 @@ def main():
             st.subheader(f"Job Details: {st.session_state.selected_job}")
             
             # Add delete button
-            if st.button("🗑️ Delete Job", type="secondary", use_container_width=True):
-                if st.button("⚠️ Confirm Delete - This action cannot be undone!", type="primary"):
-                    if workspace_service.delete_job(st.session_state.selected_job):
-                        del st.session_state.selected_job
-                        st.rerun()
-                    else:
-                        st.error("Failed to delete job")
+            if st.button(
+                "🗑️ Delete Job",
+                type="secondary",
+                use_container_width=True,
+            ):
+                if workspace_service.delete_job(st.session_state.selected_job):
+                    del st.session_state.selected_job
+                    st.rerun()
+                else:
+                    st.error("Failed to delete job")
 
             # Get runs for the selected job
             runs = workspace_service.get_job_runs(st.session_state.selected_job)
