@@ -179,22 +179,29 @@ class WorkspaceService:
         today = datetime.now().strftime("%Y-%m-%d")
         completed_today = 0
         total_render_time = 0
-        total_jobs = 0
+        total_runs = 0
 
         for job in jobs_dir.iterdir():
             if not job.is_dir():
                 continue
             
-            # Count runs completed today
+            # Process each run in the job
             for run in job.iterdir():
                 if not run.is_dir():
                     continue
+                    
+                # Count runs completed today
                 run_date = run.name.split('_')[0]
                 if run_date == today:
                     completed_today += 1
-                    total_jobs += 1
+                
+                # Get render time for this run
+                run_stats = self.get_run_stats(job.name, run.name)
+                if run_stats["render_time"] > 0:
+                    total_render_time += run_stats["render_time"]
+                    total_runs += 1
 
-        avg_render_time = total_render_time / total_jobs if total_jobs > 0 else 0
+        avg_render_time = total_render_time / total_runs if total_runs > 0 else 0
         active_jobs = len([job for job in jobs_dir.iterdir() if job.is_dir()])
 
         return (active_jobs, completed_today, avg_render_time)
