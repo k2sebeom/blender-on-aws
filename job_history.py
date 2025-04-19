@@ -158,11 +158,10 @@ def main():
                         is_animation = stats.get("mode") == "Animation"
                         
                         if is_animation:
-                            # For animation, look for mp4 file in static directory
-                            static_dir = Path(render_files[0][0]).parent
-                            mp4_files = list(static_dir.glob("*.mp4"))
-                            if mp4_files:
-                                mp4_file = mp4_files[0]
+                            cols = st.columns(2)
+                            # For animation, just get mp4 file
+                            mp4_file = render_files[0][1]
+                            with cols[0]:
                                 st.video(str(mp4_file))
                                 # Add download button for the video
                                 with open(mp4_file, "rb") as f:

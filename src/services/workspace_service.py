@@ -190,11 +190,11 @@ class WorkspaceService:
         # Get both compressed and original files
         render_pairs = []
         if render_dir.exists() and static_dir.exists():
-            png_files = sorted(render_dir.glob('*.png'))
-            for png_file in png_files:
-                jpg_file = static_dir / f"{png_file.stem}.jpg"
-                if jpg_file.exists():
-                    render_pairs.append((jpg_file, png_file))
+            src_files = sorted(render_dir.glob('*'))
+            for src_file in src_files:
+                static_file = static_dir / f"{src_file.stem}.*"
+                if static_file.exists():
+                    render_pairs.append((static_file, src_file))
 
         return (source_files, render_pairs)
 

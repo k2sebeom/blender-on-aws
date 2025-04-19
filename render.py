@@ -197,11 +197,14 @@ with st.container():
                                         mime="image/png",
                                     )
                         else:  # Animation mode
+                            cols = st.columns(2)
                             if rendered_files:
                                 # Get the first (and only) video pair
                                 src_vid, mp4_vid = rendered_files[0]
                                 # Display the video
-                                st.video(str(mp4_vid))
+                                with cols[0]:
+                                    st.video(str(mp4_vid))
+
                                 # Add download button for the video
                                 with open(mp4_vid, "rb") as f:
                                     st.download_button(
