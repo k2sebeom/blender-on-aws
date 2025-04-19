@@ -119,7 +119,7 @@ class BlenderService:
                 return compressed_pairs, process.stdout, process.stderr
             else:
                 # For animation mode, convert the rendered video to mp4
-                rendered_video = next(Path(render_dir).glob("*.avi"), None)
+                rendered_video = next(Path(render_dir).glob("*"), None)
                 if rendered_video:
                     video_pair = self.convert_to_mp4(rendered_video, run_dir)
                     return [video_pair], process.stdout, process.stderr

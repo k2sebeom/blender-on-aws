@@ -199,16 +199,16 @@ with st.container():
                         else:  # Animation mode
                             if rendered_files:
                                 # Get the first (and only) video pair
-                                src_vid, mkv_vid = rendered_files[0]
+                                src_vid, mp4_vid = rendered_files[0]
                                 # Display the video
-                                st.video(str(mkv_vid))
+                                st.video(str(mp4_vid))
                                 # Add download button for the video
-                                with open(mkv_vid, "rb") as f:
+                                with open(mp4_vid, "rb") as f:
                                     st.download_button(
                                         label="Download Animation",
                                         data=f,
-                                        file_name=mkv_vid.name,
-                                        mime="video/x-matroska",
+                                        file_name=mp4_vid.name,
+                                        mime="video/mp4",
                                     )
 
                 except Exception as e:
