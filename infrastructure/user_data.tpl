@@ -38,8 +38,7 @@ fi
 cd blender-on-aws
 export UV_PATH=$(which uv)
 export BLENDER_SERVER_ROOT=$(pwd)
-envsubst < manifests/blender-server.service > blender-server.service.tmp
-sudo mv blender-server.service.tmp /etc/systemd/system/blender-server.service
+sudo envsubst < manifests/blender-server.service > /etc/systemd/system/blender-server.service
 sudo systemctl daemon-reload
 sudo systemctl enable blender-server
 sudo systemctl start blender-server
