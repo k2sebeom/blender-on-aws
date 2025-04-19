@@ -260,7 +260,7 @@ def main(config):
                                     # Read and display the image
                                     with open(render_file, "rb") as f:
                                         image_bytes = f.read()
-                                        st.image(image_bytes, caption=render_file.name, use_column_width=True)
+                                        st.image(image_bytes, caption=render_file.name, use_container_width=True)
                                         # Add download button
                                         st.download_button(
                                             f"Download {render_file.name}",
