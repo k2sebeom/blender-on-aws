@@ -1,0 +1,10 @@
+[Unit]
+Description=Blender render server
+
+[Service]
+WorkingDirectory=${BLENDER_SERVER_ROOT}
+ExecStart=${UV_PATH} run ./run.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
