@@ -11,13 +11,6 @@ resource "aws_security_group" "blender_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -34,7 +27,8 @@ resource "aws_security_group" "blender_sg" {
 resource "aws_instance" "blender_instance" {
   ami           = var.instance_ami
   instance_type = var.instance_type
-  subnet_id     = module.vpc.public_subnets[0]
+  subnet_id     = module.vpc.private_subnets[0]
+  iam_instance_profile = aws_iam_instance_profile.ec2_ssm_profile.name
 
   vpc_security_group_ids = [aws_security_group.blender_sg.id]
 
