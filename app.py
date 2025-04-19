@@ -3,6 +3,28 @@ from streamlit_extras.stateful_button import button
 import os
 from datetime import datetime
 import time
+import argparse
+import yaml
+from pathlib import Path
+
+def load_config(config_path):
+    """Load configuration from YAML file."""
+    try:
+        with open(config_path, 'r') as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        st.error(f"Error loading config file: {e}")
+        return None
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Blender Online Renderer')
+parser.add_argument('-c', '--config', 
+                    default='config.yaml',
+                    help='Path to config file (default: config.yaml)')
+args = parser.parse_args()
+
+# Load configuration
+config = load_config(args.config)
 
 # Set page config
 st.set_page_config(
@@ -36,13 +58,23 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-def main():
+def main(config):
     # Header
     st.title("🎨 Blender Online Renderer")
     st.markdown("Upload your .blend file and we'll render it for you!")
 
+    # Create workspace directories if they don't exist
+    if config and 'workspace' in config:
+        for dir_name in ['upload_dir', 'output_dir', 'temp_dir']:
+            if dir_name in config['workspace']:
+                Path(config['workspace'][dir_name]).mkdir(parents=True, exist_ok=True)
+
     # File upload section
     with st.container():
+        # Display max file size from config
+        if config and 'workspace' in config and 'max_upload_size' in config['workspace']:
+            st.info(f"Maximum upload size: {config['workspace']['max_upload_size']} MB")
+
         # Configuration inputs
         job_name = st.text_input("Job Name", placeholder="Enter a name for your rendering job")
         frames_input = st.text_input("Frame Range", placeholder="Single number (e.g., 1) or range (e.g., 1-100)", value=1)
@@ -138,4 +170,4 @@ def main():
     st.markdown("Made with ❤️ using Streamlit")
 
 if __name__ == "__main__":
-    main()
+    main(config)
