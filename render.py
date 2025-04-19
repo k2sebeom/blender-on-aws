@@ -1,69 +1,20 @@
 import streamlit as st
-import argparse
 import json
 from datetime import datetime
 
-from src.config.config_loader import ConfigLoader
-from src.services.workspace_service import WorkspaceService
 from src.services.blender_service import BlenderService
+from src.utils.styles import get_common_styles
+from src.utils.config_init import initialize_app
 
-# Initialize session state for render logs
-if "stdout" not in st.session_state:
-    st.session_state.stdout = ""
-if "stderr" not in st.session_state:
-    st.session_state.stderr = ""
+# Initialize session state
 if "is_rendering" not in st.session_state:
     st.session_state.is_rendering = False
 
-# Parse command line arguments
-parser = argparse.ArgumentParser(description="Blender Online Renderer")
-parser.add_argument(
-    "-c",
-    "--config",
-    default="config.yaml",
-    help="Path to config file (default: config.yaml)",
-)
-args = parser.parse_args()
-
-# Load configuration
-config = ConfigLoader.load_config(args.config)
-
-# Initialize workspace
-if config:
-    workspace_service = WorkspaceService(config)
-    if not workspace_service.initialize_workspace():
-        st.error(
-            "Failed to initialize workspace. Please check the configuration and permissions."
-        )
-        st.stop()
+# Initialize app and get config/workspace service
+config, workspace_service = initialize_app()
 
 # Add custom CSS
-st.markdown(
-    """
-    <style>
-    .main {
-        padding: 2rem;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #00cc00;
-    }
-    .upload-status {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 1rem 0;
-    }
-    .success {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    .error {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    </style>
-""",
-    unsafe_allow_html=True,
-)
+st.markdown(get_common_styles(), unsafe_allow_html=True)
 
 # Header
 st.title("🎨 Render")
@@ -182,10 +133,6 @@ with st.container():
                                 stored_file, run_dir, frames_input
                             )
                         )
-
-                        # Store the logs in session state
-                        st.session_state.stdout = stdout
-                        st.session_state.stderr = stderr
 
                         # Update metadata with completion info
                         meta["finished_time"] = datetime.now().isoformat()

@@ -1,57 +1,18 @@
 import streamlit as st
 import pandas as pd
-from src.config.config_loader import ConfigLoader
-from src.services.workspace_service import WorkspaceService
-import argparse
-
-# Parse command line arguments
-parser = argparse.ArgumentParser(description="Blender Online Renderer")
-parser.add_argument(
-    "-c",
-    "--config",
-    default="config.yaml",
-    help="Path to config file (default: config.yaml)",
-)
-args = parser.parse_args()
-
-# Load configuration
-config = ConfigLoader.load_config(args.config)
-
-# Initialize workspace
-if config:
-    workspace_service = WorkspaceService(config)
-    if not workspace_service.initialize_workspace():
-        st.error(
-            "Failed to initialize workspace. Please check the configuration and permissions."
-        )
-        st.stop()
+from src.utils.config_init import initialize_app
+from src.utils.styles import get_common_styles
 
 # Set page config
 st.set_page_config(
     page_title="Job History - Blender Online Renderer", page_icon="📋", layout="wide"
 )
 
+# Initialize app and get config/workspace service
+config, workspace_service = initialize_app()
+
 # Add custom CSS
-st.markdown(
-    """
-    <style>
-    .main {
-        padding: 2rem;
-    }
-    .job-table {
-        margin-bottom: 1rem;
-    }
-    .empty-placeholder {
-        text-align: center;
-        padding: 2rem;
-        background-color: #f8f9fa;
-        border-radius: 0.5rem;
-        margin: 1rem 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+st.markdown(get_common_styles(), unsafe_allow_html=True)
 
 
 def main():
