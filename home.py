@@ -100,23 +100,17 @@ with st.container():
             is_valid = False
         else:
             # Validate frame range format
-            if "-" in frames_input:
-                try:
-                    map(int, frames_input.replace('..', ',').split(","))
-                except ValueError:
-                    st.error(
-                        "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
-                    )
-                    is_valid = False
-            else:
-                try:
-                    frame = int(frames_input)
+            try:
+                for frame in map(int, frames_input.replace('..', ',').split(",")):
                     if frame < 1:
                         st.error("Frame number must be positive")
                         is_valid = False
-                except ValueError:
-                    st.error("Invalid frame number")
-                    is_valid = False
+                        break
+            except ValueError:
+                st.error(
+                    "Invalid frame range format. Use either a single number, start..end, or f,f,f format"
+                )
+                is_valid = False
 
         if "render_button" not in st.session_state:
             st.session_state.is_rendering = False
