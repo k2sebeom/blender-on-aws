@@ -125,7 +125,7 @@ def main():
             )
         else:
             st.subheader(f"Job Details: {st.session_state.selected_job}")
-            
+
             # Add delete button
             if st.button(
                 "🗑️ Delete Job",
@@ -194,7 +194,7 @@ def main():
                         st.markdown("### Render Outputs")
                         # Create 3 columns for the grid
                         cols = st.columns(3)
-                        
+
                         # Display compressed JPGs with PNG download links
                         for idx, (jpg_file, png_file) in enumerate(render_files):
                             with cols[idx % 3]:  # Distribute across 3 columns

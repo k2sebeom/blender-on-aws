@@ -2,7 +2,6 @@ import streamlit as st
 import argparse
 import json
 from datetime import datetime
-from pathlib import Path
 
 from src.config.config_loader import ConfigLoader
 from src.services.workspace_service import WorkspaceService
@@ -104,7 +103,7 @@ with st.container():
         else:
             # Validate frame range format
             try:
-                for frame in map(int, frames_input.replace('..', ',').split(",")):
+                for frame in map(int, frames_input.replace("..", ",").split(",")):
                     if frame < 1:
                         st.error("Frame number must be positive")
                         is_valid = False
@@ -147,7 +146,7 @@ with st.container():
 
                     # Create run directory with timestamp
                     run_dir = workspace_service.create_run_directory(job_dir)
-                    
+
                     # Create initial metadata
                     meta = {
                         "created_time": datetime.now().isoformat(),
@@ -155,9 +154,9 @@ with st.container():
                         "source_file": uploaded_file.name,
                         "finished_time": None,
                         "num_files": 0,
-                        "render_time": 0
+                        "render_time": 0,
                     }
-                    
+
                     # Write initial metadata
                     with open(run_dir / "meta.json", "w") as f:
                         json.dump(meta, f, indent=2)
@@ -194,8 +193,10 @@ with st.container():
                         # Calculate render time in seconds
                         created_time = datetime.fromisoformat(meta["created_time"])
                         finished_time = datetime.fromisoformat(meta["finished_time"])
-                        meta["render_time"] = (finished_time - created_time).total_seconds()
-                        
+                        meta["render_time"] = (
+                            finished_time - created_time
+                        ).total_seconds()
+
                         # Write final metadata
                         with open(run_dir / "meta.json", "w") as f:
                             json.dump(meta, f, indent=2)
