@@ -14,7 +14,7 @@ class BlenderService:
         """
         self.workspace_root = workspace_root
     
-    def render_blend_file(self, blend_file: Path, run_dir: Path, frame_range: str) -> List[Path]:
+    def render_blend_file(self, blend_file: Path, run_dir: Path, frame_range: str) -> tuple[List[Path], str, str]:
         """
         Create render directory and execute blender render command.
         
@@ -24,7 +24,10 @@ class BlenderService:
             frame_range (str): Frame range to render
             
         Returns:
-            List[Path]: List of paths to rendered PNG files
+            tuple[List[Path], str, str]: Tuple containing:
+                - List of paths to rendered PNG files
+                - stdout from the render process
+                - stderr from the render process
         """
         # Create render directory
         render_dir = run_dir / "render"
@@ -47,7 +50,7 @@ class BlenderService:
         ]
         
         try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            process = subprocess.run(cmd, check=True, capture_output=True, text=True)
             
             # Get list of rendered PNG files
             rendered_files = sorted(Path(render_dir).glob("*.png"))
@@ -55,7 +58,7 @@ class BlenderService:
             if not rendered_files:
                 raise Exception("No rendered files found")
                 
-            return rendered_files
+            return rendered_files, process.stdout, process.stderr
             
         except subprocess.CalledProcessError as e:
             raise Exception(f"Blender render failed: {e.stderr}")

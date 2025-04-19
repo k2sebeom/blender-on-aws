@@ -6,6 +6,14 @@ from src.config.config_loader import ConfigLoader
 from src.services.workspace_service import WorkspaceService
 from src.services.blender_service import BlenderService
 
+# Initialize session state for render logs
+if 'stdout' not in st.session_state:
+    st.session_state.stdout = ""
+if 'stderr' not in st.session_state:
+    st.session_state.stderr = ""
+if 'is_rendering' not in st.session_state:
+    st.session_state.is_rendering = False
+
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Blender Online Renderer")
 parser.add_argument(
@@ -121,8 +129,10 @@ def main(config):
                         st.error("Invalid frame number")
                         is_valid = False
 
-            # Submit button
-            if button("Start Rendering", key="render_button") and is_valid:
+            # Submit button - disabled while rendering
+            if button("Start Rendering", key="render_button", disabled=st.session_state.is_rendering) and is_valid:
+                # Set rendering state to True
+                st.session_state.is_rendering = True
                 # Display confirmed settings
                 st.info(f"""
                 Rendering with the following settings:
@@ -154,11 +164,24 @@ def main(config):
                                 workspace_service.get_workspace_path()
                             )
 
-                            # Render the file
-                            rendered_files = blender_service.render_blend_file(
+                            # Render the file and get outputs
+                            rendered_files, stdout, stderr = blender_service.render_blend_file(
                                 stored_file, run_dir, frames_input
                             )
+                            
+                            # Store the logs in session state
+                            st.session_state.stdout = stdout
+                            st.session_state.stderr = stderr
+                            
                             st.success("Rendering completed successfully!")
+
+                            # Show expandable section with stdout/stderr tabs
+                            with st.expander("View Render Logs"):
+                                tab1, tab2 = st.tabs(["Standard Output", "Standard Error"])
+                                with tab1:
+                                    st.text_area("stdout", value=stdout, height=300)
+                                with tab2:
+                                    st.text_area("stderr", value=stderr, height=300)
 
                             # Display rendered images in a 3-column grid
                             st.subheader("📥 Rendered Files")
@@ -182,6 +205,9 @@ def main(config):
                     except Exception as e:
                         st.error(f"Error processing file: {e}")
                         st.stop()
+                    finally:
+                        # Reset rendering state
+                        st.session_state.is_rendering = False
 
     # Job History Section
     with st.container():
