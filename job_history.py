@@ -173,23 +173,28 @@ def main():
                                         mime="application/octet-stream",
                                     )
 
-                    # Display render outputs
+                    # Display render outputs in 3 columns
                     if render_files:
                         st.markdown("### Render Outputs")
-                        for render_file in render_files:
-                            with open(render_file, "rb") as f:
-                                image_bytes = f.read()
-                                st.image(
-                                    image_bytes,
-                                    caption=render_file.name,
-                                    use_container_width=True,
-                                )
-                                st.download_button(
-                                    f"Download {render_file.name}",
-                                    image_bytes,
-                                    file_name=render_file.name,
-                                    mime="image/png",
-                                )
+                        # Create 3 columns for the grid
+                        cols = st.columns(3)
+                        
+                        # Display images across columns
+                        for idx, render_file in enumerate(render_files):
+                            with cols[idx % 3]:  # Distribute across 3 columns
+                                with open(render_file, "rb") as f:
+                                    image_bytes = f.read()
+                                    st.image(
+                                        image_bytes,
+                                        caption=render_file.name,
+                                        use_container_width=True,
+                                    )
+                                    st.download_button(
+                                        f"Download {render_file.name}",
+                                        image_bytes,
+                                        file_name=render_file.name,
+                                        mime="image/png",
+                                    )
             else:
                 st.info("No runs found for this job.")
 
