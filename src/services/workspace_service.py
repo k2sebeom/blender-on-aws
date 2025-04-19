@@ -242,7 +242,7 @@ class WorkspaceService:
             return {
                 "num_files": meta["num_files"],
                 "render_time": meta["render_time"],
-                "mode": meta["mode"]
+                "mode": meta.get("mode", "Still Frame"),
             }
         except Exception as e:
             st.error(f"Error reading meta.json: {e}")
