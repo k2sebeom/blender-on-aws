@@ -228,6 +228,17 @@ with cols[2]:
                     mime="application/octet-stream",
                 )
 
+        # Add delete button
+        if st.button("🗑️ Delete Job", type="primary", use_container_width=True):
+            # Delete job from workspace and database
+            if workspace_service.delete_job(job) and db_service.delete_job(job.id):
+                st.success("Job deleted successfully")
+                # Clear selected job from session state
+                del st.session_state.selected_job
+                st.rerun()
+            else:
+                st.error("Failed to delete job")
+
         # Display render outputs
         st.markdown("### 🎬 Render Outputs")
 

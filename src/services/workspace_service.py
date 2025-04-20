@@ -87,3 +87,22 @@ class WorkspaceService:
                     render_pairs.append((render_file, next(static_files)))
 
         return render_pairs
+
+    def delete_job(self, job: Job) -> bool:
+        """
+        Delete a job's workspace directory.
+        
+        Args:
+            job (Job): Job instance to delete
+            
+        Returns:
+            bool: True if deletion successful, False otherwise
+        """
+        try:
+            job_dir = self.parse_job_directory(job)
+            if job_dir.exists():
+                shutil.rmtree(job_dir)
+            return True
+        except Exception as e:
+            st.error(f"Error deleting job workspace: {e}")
+            return False
