@@ -255,7 +255,6 @@ with cols[2]:
                 else:
                     st.video(
                         str(static_file),
-                        use_container_width=True,
                     )
                     # Add download button for the video
                     with open(static_file, "rb") as f:

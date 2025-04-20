@@ -66,22 +66,22 @@ class DatabaseService:
             return session.query(Job).filter(Job.id == job_id).first()
 
     def get_all_jobs(self) -> List[Job]:
-        """Retrieve all jobs from the database.
+        """Retrieve all jobs from the database, sorted by creation time (newest first).
         
         Returns:
-            List[Job]: List of all jobs
+            List[Job]: List of all jobs ordered by created_at in descending order
         """
         with self.Session() as session:
-            return session.query(Job).all()
+            return session.query(Job).order_by(Job.created_at.desc()).all()
     
     def get_queued_jobs(self) -> List[Job]:
-        """Retrieve all queued (unfinished) jobs from the database.
+        """Retrieve all queued (unfinished) jobs from the database, sorted by creation time (newest first).
         
         Returns:
-            List[Job]: List of jobs where finished_at is None
+            List[Job]: List of jobs where finished_at is None, ordered by created_at in descending order
         """
         with self.Session() as session:
-            return session.query(Job).filter(Job.finished_at == None).all()
+            return session.query(Job).filter(Job.finished_at == None).order_by(Job.created_at.desc()).all()
 
     def update_job(self, job_id: str, **kwargs) -> Optional[Job]:
         """Update a job's attributes.
