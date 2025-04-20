@@ -107,7 +107,7 @@ with cols[0]:
                 with st.spinner("Processing your file..."):
                     # try:
                     if render_mode == RenderMode.anim:
-                        frame_range = '-'.join([str(start_frame), (end_frame)]) if end_frame else str(start_frame)
+                        frame_range = '-'.join([str(start_frame), str(end_frame)]) if end_frame else str(start_frame)
                     # Create job entry
                     job = db_service.create_job(
                         job_name,
