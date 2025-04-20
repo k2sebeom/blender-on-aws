@@ -28,6 +28,7 @@ class RenderWorker(Thread):
 
         self.workspace_service = workspace_service
         self.db_service = db_service
+        self.current_job = None
 
     def enqueue_job(self, job: Job):
         """
@@ -72,32 +73,9 @@ class RenderWorker(Thread):
             try:
                 # Get job from queue with timeout to allow checking _running flag
                 job: Job = self._queue.get(timeout=1.0)
-
+                self.current_job = job.id
                 self.render(job)
-
-                # Process the job
-                    # # Extract job parameters
-                    # mode = "still" if job.mode == "Still Frame" else "anim"
-                    
-                    # # Get the run directory from the source file path
-                    # run_dir = Path(job.source_file).parent
-                    # blend_file = Path(job.source_file)
-                    
-                    # # Render the file
-                    # rendered_files, stdout, stderr = self.blender_service.render_blend_file(
-                    #     blend_file=blend_file,
-                    #     run_dir=run_dir,
-                    #     mode=mode,
-                    #     start_frame=job.start_frame,
-                    #     end_frame=job.end_frame,
-                    #     frames_input=job.frames_input
-                    # )
-                    
-                    # # Update job with completion info
-                    # job.finished_time = datetime.now()
-                    # job.num_files = len(rendered_files)
-                    # job.render_time = int((job.finished_time - job.created_time).total_seconds())
-                
+                self.current_job = None
             except Empty:
                 time.sleep(1)
                 continue

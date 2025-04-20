@@ -148,7 +148,7 @@ with cols[1]:
                     "Job Name": job.name,
                     "Created At": job.created_at,
                     "Source": job.source_file,
-                    "Status": "complete" if job.finished_at else "queued"
+                    "Status": "complete" if job.finished_at else ("queued" if job.id != st.session_state.render_worker.current_job else "active")
                 }
                 for job in jobs
             ]
