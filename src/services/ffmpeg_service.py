@@ -84,7 +84,7 @@ class FFmpegService:
             try:
                 # Execute ffmpeg command
                 subprocess.run(cmd, check=True, capture_output=True, text=True)
-                compressed_pairs.append((jpg_path, png_file))
+                compressed_pairs.append((png_file, jpg_path))
             except subprocess.CalledProcessError as e:
                 print(f"Error compressing {png_file.name}: {e.stderr}")
                 continue
