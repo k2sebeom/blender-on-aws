@@ -1,6 +1,5 @@
 from threading import Thread
 from queue import Queue, Empty
-from pathlib import Path
 from datetime import datetime, timezone
 import time
 

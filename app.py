@@ -7,14 +7,14 @@ from src.utils.styles import get_common_styles
 from src.utils.config_init import initialize_app
 
 st.set_page_config(
-    'Blender on AWS',
-    layout='wide',
+    "Blender on AWS",
+    layout="wide",
 )
 
 # Initialize session state
 if "is_rendering" not in st.session_state:
     st.session_state.is_rendering = False
-    
+
 # Initialize app and get config/workspace service
 config, workspace_service, db_service = initialize_app()
 
@@ -38,21 +38,23 @@ with cols[0]:
     # File upload section
     with st.container():
         # Display max file size from config
-        if config and "workspace" in config and "max_upload_size" in config["workspace"]:
+        if (
+            config
+            and "workspace" in config
+            and "max_upload_size" in config["workspace"]
+        ):
             st.info(f"Maximum upload size: {config['workspace']['max_upload_size']} MB")
 
         # Configuration inputs
         job_name = st.text_input(
             "Job Name", placeholder="Enter a name for your rendering job"
         )
-    
+
         # Render mode selection
         render_mode: RenderMode = st.radio(
-            "Render Mode",
-            options=[RenderMode.still, RenderMode.anim],
-            horizontal=True
+            "Render Mode", options=[RenderMode.still, RenderMode.anim], horizontal=True
         )
-    
+
         # Frame inputs based on mode
         if render_mode == RenderMode.still:
             frame_range = st.text_input(
@@ -65,7 +67,9 @@ with cols[0]:
             with col1:
                 start_frame = st.number_input("Start Frame", min_value=1, value=1)
             with col2:
-                end_frame = st.number_input("End Frame", min_value=start_frame, value=None)
+                end_frame = st.number_input(
+                    "End Frame", min_value=start_frame, value=None
+                )
 
         st.subheader("📤 Upload Your File")
         uploaded_file = st.file_uploader("Choose a .blend file", type=["blend"])
@@ -84,7 +88,9 @@ with cols[0]:
                 else:
                     # Validate frame range format
                     try:
-                        for frame in map(int, frame_range.replace("..", ",").split(",")):
+                        for frame in map(
+                            int, frame_range.replace("..", ",").split(",")
+                        ):
                             if frame < 1:
                                 st.error("Frame number must be positive")
                                 is_valid = False
@@ -107,7 +113,11 @@ with cols[0]:
                 with st.spinner("Processing your file..."):
                     # try:
                     if render_mode == RenderMode.anim:
-                        frame_range = '-'.join([str(start_frame), str(end_frame)]) if end_frame else str(start_frame)
+                        frame_range = (
+                            "-".join([str(start_frame), str(end_frame)])
+                            if end_frame
+                            else str(start_frame)
+                        )
                     # Create job entry
                     job = db_service.create_job(
                         job_name,
@@ -117,7 +127,9 @@ with cols[0]:
                     )
 
                     # Create job directory
-                    job_dir = workspace_service.create_job_directory(job, uploaded_file.getvalue(), uploaded_file.name)
+                    job_dir = workspace_service.create_job_directory(
+                        job, uploaded_file.getvalue(), uploaded_file.name
+                    )
 
                     # Queue the job
                     st.session_state.render_worker.enqueue_job(job)
@@ -139,7 +151,7 @@ with cols[1]:
     )
 
     jobs = db_service.get_all_jobs()
-    
+
     if jobs:
         df = pd.DataFrame(
             [
@@ -148,7 +160,13 @@ with cols[1]:
                     "Job Name": job.name,
                     "Created At": job.created_at,
                     "Source": job.source_file,
-                    "Status": "complete" if job.finished_at else ("queued" if job.id != st.session_state.render_worker.current_job else "active")
+                    "Status": "complete"
+                    if job.finished_at
+                    else (
+                        "queued"
+                        if job.id != st.session_state.render_worker.current_job
+                        else "active"
+                    ),
                 }
                 for job in jobs
             ]
@@ -158,7 +176,7 @@ with cols[1]:
             on_select="rerun",
             selection_mode="single-row",
             hide_index=True,
-            key='queued-jobs',
+            key="queued-jobs",
         )
         if len(event.selection.get("rows")) > 0:
             selected_row = event.selection.get("rows")[0]
@@ -208,7 +226,7 @@ with cols[2]:
             st.markdown(f"`{job.name}`")
             status = "Complete" if job.finished_at else "In Progress"
             st.markdown(f"`{status}`")
-            
+
             if job.finished_at:
                 render_time = job.finished_at - job.created_at
                 minutes = int(render_time.total_seconds() // 60)
@@ -216,11 +234,11 @@ with cols[2]:
                 st.markdown(f"`{minutes}m {seconds}s`")
             else:
                 st.markdown("`-`")
-            
+
             st.markdown(f"`{job.mode}`")
             st.markdown(f"`{job.frame_range}`")
-        
-            with open(job_dir.absolute() / 'src' / job.source_file, 'rb') as f:
+
+            with open(job_dir.absolute() / "src" / job.source_file, "rb") as f:
                 st.download_button(
                     job.source_file,
                     f,

@@ -1,6 +1,6 @@
 import os
-from datetime import datetime, timezone
 from sqlalchemy import create_engine
+from sqlalchemy.sql.expression import null
 from sqlalchemy.orm import sessionmaker
 from typing import Optional, List
 
@@ -81,7 +81,7 @@ class DatabaseService:
             List[Job]: List of jobs where finished_at is None, ordered by created_at in descending order
         """
         with self.Session() as session:
-            return session.query(Job).filter(Job.finished_at == None).order_by(Job.created_at.desc()).all()
+            return session.query(Job).filter(Job.finished_at.isnot(null())).order_by(Job.created_at.desc()).all()
 
     def update_job(self, job_id: str, **kwargs) -> Optional[Job]:
         """Update a job's attributes.
