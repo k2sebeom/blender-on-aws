@@ -124,9 +124,6 @@ with cols[0]:
 
                     st.info("Job submitted")
 
-                    # except Exception as e:
-                    #     st.error(f"Error processing file: {e}")
-                    #     st.stop()
 
 with cols[1]:
     st.title("📋 Jobs")
@@ -258,7 +255,6 @@ with cols[2]:
                 else:
                     st.video(
                         str(static_file),
-                        caption=render_file.name,
                         use_container_width=True,
                     )
                     # Add download button for the video
