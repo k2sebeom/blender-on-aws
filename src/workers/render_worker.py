@@ -43,7 +43,6 @@ class RenderWorker(Thread):
         self._running = False
 
     def render(self, job: Job):
-        return
         print(f"Starting {job.name}-{job.id}")
 
         job_dir = self.workspace_service.parse_job_directory(job)
