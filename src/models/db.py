@@ -17,4 +17,4 @@ class Job(Base):
     source_file = Column(String, nullable=False)
 
     def __repr__(self):
-        return f"<Job(job_id='{self.id}', job_name='{self.name}')>"
+        return f"<Job(job_id='{self.id}', job_name='{self.name}' created_at='{self.created_at} finished_at='{self.finished_at}')>"

@@ -135,7 +135,9 @@ with cols[0]:
                     render_worker: RenderWorker = st.session_state.render_worker
                     if not render_worker.is_alive:
                         print("Reviving render worker...")
-                        st.session_state.render_worker = RenderWorker(workspace_service, db_service)
+                        st.session_state.render_worker = RenderWorker(
+                            workspace_service, db_service
+                        )
                         st.session_state.render_worker.start()
 
                     st.session_state.render_worker.enqueue_job(job)
@@ -213,6 +215,8 @@ with cols[2]:
     else:
         selected_job_id = st.session_state.selected_job
         job = db_service.get_job(int(selected_job_id))
+
+        print(f"Got {job}")
 
         job_dir = workspace_service.parse_job_directory(job)
         # Create two columns for job details
