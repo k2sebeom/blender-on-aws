@@ -15,6 +15,7 @@ class Job(Base):
     frame_range = Column(String, nullable=False)
     mode = Column(String, nullable=False)
     source_file = Column(String, nullable=False)
+    status = Column(String, default='complete', nullable=False)
 
     def __repr__(self):
-        return f"<Job(job_id='{self.id}', job_name='{self.name}' created_at='{self.created_at} finished_at='{self.finished_at}')>"
+        return f"<Job(job_id='{self.id}', job_name='{self.name}' created_at='{self.created_at} finished_at='{self.finished_at}' status={self.status})>"

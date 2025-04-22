@@ -1,7 +1,4 @@
-from threading import Thread
-from queue import Queue, Empty
 from datetime import datetime, timezone
-import time
 
 from blender_on_aws.models.db import Job
 from blender_on_aws.services.blender_service import BlenderService
@@ -9,7 +6,7 @@ from blender_on_aws.services.db_service import DatabaseService
 from blender_on_aws.services.workspace_service import WorkspaceService
 
 
-class RenderWorker(Thread):
+class RenderWorker:
     """Worker thread to process render jobs from a queue."""
     
     def __init__(self, workspace_service: WorkspaceService, db_service: DatabaseService):
@@ -20,30 +17,14 @@ class RenderWorker(Thread):
             workspace_root (Path): Path to workspace root directory
         """
         super().__init__(daemon=True)
-        self._queue = Queue()
-        self._running = True
+
         self.blender_service = BlenderService(workspace_service.workspace_root)
         self.db_service = db_service
-
         self.workspace_service = workspace_service
-        self.db_service = db_service
-        self.current_job = None
-
-    def enqueue_job(self, job: Job):
-        """
-        Add a render job to the queue.
-        
-        Args:
-            job (Job): The render job to queue
-        """
-        self._queue.put(job)
-
-    def stop(self):
-        """Stop the worker thread."""
-        self._running = False
 
     def render(self, job: Job):
         print(f"Starting {job.name}-{job.id}")
+        self.db_service.update_job(job.id, status='active')
 
         job_dir = self.workspace_service.parse_job_directory(job)
 
@@ -56,6 +37,7 @@ class RenderWorker(Thread):
 
         self.db_service.update_job(
             job.id,
+            status='complete',
             finished_at=datetime.now(timezone.utc),
         )
         print(f"Completed Job {job.name}-{job.id}")
@@ -63,18 +45,11 @@ class RenderWorker(Thread):
 
     def run(self):
         """Process jobs from the queue."""
-        queued_jobs = self.db_service.get_queued_jobs()
+        while True:
+            queued_jobs = self.db_service.get_queued_jobs()
+            print(f'Retrieved Queue jobs')
+            for job in queued_jobs:
+                print(f'- {job.id}: {job.name}')
 
-        for job in queued_jobs:
-            self.render(job)
-
-        while self._running:
-            try:
-                # Get job from queue with timeout to allow checking _running flag
-                job: Job = self._queue.get(timeout=1.0)
-                self.current_job = job.id
+            for job in queued_jobs:
                 self.render(job)
-                self.current_job = None
-            except Empty:
-                time.sleep(1)
-                continue

@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 
 from blender_on_aws.models.job import RenderMode
-from blender_on_aws.workers.render_worker import RenderWorker
 from blender_on_aws.utils.styles import get_common_styles
 from blender_on_aws.utils.config_init import initialize_app
 
@@ -17,12 +16,6 @@ if "is_rendering" not in st.session_state:
 
 # Initialize app and get config/workspace service
 config, workspace_service, db_service = initialize_app()
-
-# Initialize render worker
-if "render_worker" not in st.session_state:
-    st.session_state.render_worker = RenderWorker.get_instance(workspace_service, db_service)
-    if not st.session_state.render_worker.is_alive():
-        st.session_state.render_worker.start()
 
 # Add custom CSS
 st.markdown(get_common_styles(), unsafe_allow_html=True)
@@ -119,6 +112,7 @@ with cols[0]:
                             if end_frame
                             else str(start_frame)
                         )
+
                     # Create job entry
                     job = db_service.create_job(
                         job_name,
@@ -131,17 +125,6 @@ with cols[0]:
                     job_dir = workspace_service.create_job_directory(
                         job, uploaded_file.getvalue(), uploaded_file.name
                     )
-
-                    # Queue the job
-                    render_worker: RenderWorker = st.session_state.render_worker
-                    if not render_worker.is_alive:
-                        print("Reviving render worker...")
-                        st.session_state.render_worker = RenderWorker.get_instance(
-                            workspace_service, db_service
-                        )
-                        st.session_state.render_worker.start()
-
-                    st.session_state.render_worker.enqueue_job(job)
 
                     st.info("Job submitted")
 
@@ -169,13 +152,7 @@ with cols[1]:
                     "Job Name": job.name,
                     "Created At": job.created_at,
                     "Source": job.source_file,
-                    "Status": "complete"
-                    if job.finished_at
-                    else (
-                        "queued"
-                        if job.id != st.session_state.render_worker.current_job
-                        else "active"
-                    ),
+                    "Status": job.status,
                 }
                 for job in jobs
             ]
@@ -235,10 +212,9 @@ with cols[2]:
         with col2:
             st.markdown(f"`{job.id}`")
             st.markdown(f"`{job.name}`")
-            status = "Complete" if job.finished_at else "In Progress"
-            st.markdown(f"`{status}`")
+            st.markdown(f"`{job.status}`")
 
-            if job.finished_at:
+            if job.status == 'complete':
                 render_time = job.finished_at - job.created_at
                 minutes = int(render_time.total_seconds() // 60)
                 seconds = int(render_time.total_seconds() % 60)

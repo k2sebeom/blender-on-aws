@@ -46,7 +46,8 @@ class DatabaseService:
                 name=job_name,
                 frame_range=frame_range,
                 mode=mode,
-                source_file=source_file
+                source_file=source_file,
+                status='queued',
             )
             session.add(job)
             session.commit()
@@ -76,12 +77,12 @@ class DatabaseService:
     
     def get_queued_jobs(self) -> List[Job]:
         """Retrieve all queued (unfinished) jobs from the database, sorted by creation time (newest first).
-        
+
         Returns:
             List[Job]: List of jobs where finished_at is None, ordered by created_at in descending order
         """
         with self.Session() as session:
-            return session.query(Job).filter(Job.finished_at.is_(null())).order_by(Job.created_at.desc()).all()
+            return session.query(Job).filter(Job.status != 'complete').order_by(Job.created_at.desc()).all()
 
     def update_job(self, job_id: str, **kwargs) -> Optional[Job]:
         """Update a job's attributes.
