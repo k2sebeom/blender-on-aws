@@ -3,7 +3,7 @@ from typing import Dict
 import streamlit as st
 import shutil
 from typing import List, Tuple
-from src.models.db import Job
+from blender_on_aws.models.db import Job
 
 
 class WorkspaceService:

@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import List, Tuple
 import subprocess
-from src.services.ffmpeg_service import FFmpegService
-from src.models.db import Job
-from src.models.job import RenderMode
+from blender_on_aws.services.ffmpeg_service import FFmpegService
+from blender_on_aws.models.db import Job
+from blender_on_aws.models.job import RenderMode
 
 
 class BlenderService:

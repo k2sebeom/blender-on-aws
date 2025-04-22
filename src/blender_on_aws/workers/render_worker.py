@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Lock
 from queue import Queue, Empty
 from datetime import datetime, timezone
 import time
@@ -10,9 +10,39 @@ from blender_on_aws.services.workspace_service import WorkspaceService
 
 
 class RenderWorker(Thread):
-    """Worker thread to process render jobs from a queue."""
+    """Worker thread to process render jobs from a queue. Implements the Singleton pattern."""
+    
+    _instance = None
+    _lock = Lock()
+    
+    @classmethod
+    def get_instance(cls, workspace_service: WorkspaceService = None, db_service: DatabaseService = None):
+        """
+        Get or create the singleton instance of RenderWorker.
+        
+        Args:
+            workspace_service (WorkspaceService): Required for first initialization
+            db_service (DatabaseService): Required for first initialization
+            
+        Returns:
+            RenderWorker: The singleton instance
+        """
+        if not cls._instance:
+            with cls._lock:
+                if not cls._instance:
+                    if workspace_service is None or db_service is None:
+                        raise ValueError("workspace_service and db_service are required for first initialization")
+                    cls._instance = cls.__new__(cls)
+                    cls._instance.__init_worker(workspace_service, db_service)
+        return cls._instance
     
     def __init__(self, workspace_service: WorkspaceService, db_service: DatabaseService):
+        """
+        This method is deprecated. Use get_instance() instead.
+        """
+        raise RuntimeError("Use RenderWorker.get_instance() to get the RenderWorker instance")
+    
+    def __init_worker(self, workspace_service: WorkspaceService, db_service: DatabaseService):
         """
         Initialize the render worker.
         

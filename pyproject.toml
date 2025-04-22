@@ -11,3 +11,10 @@ dependencies = [
     "streamlit-extras>=0.6.0",
     "watchdog>=6.0.0",
 ]
+
+[project.scripts]
+worker = "blender_on_aws.controller:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

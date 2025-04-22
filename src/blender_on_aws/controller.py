@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-from src.models.job import RenderMode
-from src.workers.render_worker import RenderWorker
-from src.utils.styles import get_common_styles
-from src.utils.config_init import initialize_app
+from blender_on_aws.models.job import RenderMode
+from blender_on_aws.workers.render_worker import RenderWorker
+from blender_on_aws.utils.styles import get_common_styles
+from blender_on_aws.utils.config_init import initialize_app
 
 st.set_page_config(
     "Blender on AWS",
