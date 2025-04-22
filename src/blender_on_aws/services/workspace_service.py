@@ -81,7 +81,7 @@ class WorkspaceService:
         if render_dir.exists() and static_dir.exists():
             for render_file in render_files:
                 static_files = static_dir.glob(f"{render_file.stem}.*")
-                if static_files:
+                if len(static_files) > 0:
                     render_pairs.append((render_file, next(static_files)))
 
         return render_pairs
