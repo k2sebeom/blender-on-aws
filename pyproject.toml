@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-worker = "blender_on_aws.controller:main"
+worker = "blender_on_aws.worker:main"
 
 [build-system]
 requires = ["hatchling"]
