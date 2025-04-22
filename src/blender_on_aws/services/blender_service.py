@@ -69,7 +69,7 @@ class BlenderService:
                 cmd.extend(["-e", str(frames[1])])
             cmd.append("-a")
         
-        process = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        process = subprocess.run(cmd, check=True, text=True)
         
         if job.mode == RenderMode.still:
             # Get list of rendered PNG files
