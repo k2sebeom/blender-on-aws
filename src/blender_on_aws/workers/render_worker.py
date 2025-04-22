@@ -32,12 +32,10 @@ class RenderWorker:
             status='active',
         )
 
-        _, stdout, stderr = self.blender_service.render_blend_file(
+        self.blender_service.render_blend_file(
             job_dir=job_dir,
             job=job,
         )
-        (job_dir / 'stdout.log').write_text(stdout)
-        (job_dir / 'stderr.log').write_text(stderr)
 
         self.db_service.update_job(
             job.id,
