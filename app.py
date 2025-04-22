@@ -21,7 +21,8 @@ config, workspace_service, db_service = initialize_app()
 # Initialize render worker
 if "render_worker" not in st.session_state:
     st.session_state.render_worker = RenderWorker.get_instance(workspace_service, db_service)
-    st.session_state.render_worker.start()
+    if not st.session_state.render_worker.is_alive():
+        st.session_state.render_worker.start()
 
 # Add custom CSS
 st.markdown(get_common_styles(), unsafe_allow_html=True)
