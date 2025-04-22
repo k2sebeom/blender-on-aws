@@ -70,21 +70,24 @@ class WorkspaceService:
         return job_dir
 
     def get_output_files(self, job: Job) -> List[Tuple[Path, Path]]:
-        job_dir = self.parse_job_directory(job)
-        render_dir = job_dir / 'render'
-        static_dir = job_dir / 'static'
+        try:
+            job_dir = self.parse_job_directory(job)
+            render_dir = job_dir / 'render'
+            static_dir = job_dir / 'static'
 
-        render_files = list(render_dir.glob('*')) if render_dir.exists() else []
+            render_files = list(render_dir.glob('*')) if render_dir.exists() else []
 
-        # Get both compressed and original files
-        render_pairs = []
-        if render_dir.exists() and static_dir.exists():
-            for render_file in render_files:
-                static_files = static_dir.glob(f"{render_file.stem}.*")
-                if len(static_files) > 0:
-                    render_pairs.append((render_file, next(static_files)))
+            # Get both compressed and original files
+            render_pairs = []
+            if render_dir.exists() and static_dir.exists():
+                for render_file in render_files:
+                    static_files = static_dir.glob(f"{render_file.stem}.*")
+                    if static_files:
+                        render_pairs.append((render_file, next(static_files)))
 
-        return render_pairs
+            return render_pairs
+        except:
+            return []
 
     def delete_job(self, job: Job) -> bool:
         """
