@@ -248,13 +248,18 @@ with cols[2]:
             st.markdown(f"`{job.mode}`")
             st.markdown(f"`{job.frame_range}`")
 
-            with open(job_dir.absolute() / "src" / job.source_file, "rb") as f:
-                st.download_button(
-                    job.source_file,
-                    f,
-                    job.source_file,
-                    mime="application/octet-stream",
-                )
+            src_file_path = job_dir.absolute() / "src" / str(job.source_file)
+
+            if src_file_path.exists():
+                with open(job_dir.absolute() / "src" / job.source_file, "rb") as f:
+                    st.download_button(
+                        job.source_file,
+                        f,
+                        job.source_file,
+                        mime="application/octet-stream",
+                    )
+            else:
+                st.warning(f'Source {job.source_file} does not exist')
 
         # Add delete button
         if st.button("🗑️ Delete Job", type="primary", use_container_width=True):
@@ -284,22 +289,24 @@ with cols[2]:
                         use_container_width=True,
                     )
                     # Provide download link for original PNG
-                    with open(render_file, "rb") as f:
-                        st.download_button(
-                            f"Download {render_file.name}",
-                            f,
-                            file_name=render_file.name,
-                            mime="image/png",
-                        )
+                    if render_file.exists():
+                        with open(render_file, "rb") as f:
+                            st.download_button(
+                                f"Download {render_file.name}",
+                                f,
+                                file_name=render_file.name,
+                                mime="image/png",
+                            )
                 else:
                     st.video(
                         str(static_file),
                     )
-                    # Add download button for the video
-                    with open(static_file, "rb") as f:
-                        st.download_button(
-                            f"Download {static_file.name}",
-                            f,
-                            file_name=static_file.name,
-                            mime="video/mp4",
-                        )
+                    if static_file.exists():
+                        # Add download button for the video
+                        with open(static_file, "rb") as f:
+                            st.download_button(
+                                f"Download {static_file.name}",
+                                f,
+                                file_name=static_file.name,
+                                mime="video/mp4",
+                            )
