@@ -132,6 +132,12 @@ with cols[0]:
                     )
 
                     # Queue the job
+                    render_worker: RenderWorker = st.session_state.render_worker
+                    if not render_worker.is_alive:
+                        print("Reviving render worker...")
+                        st.session_state.render_worker = RenderWorker(workspace_service, db_service)
+                        st.session_state.render_worker.start()
+
                     st.session_state.render_worker.enqueue_job(job)
 
                     st.info("Job submitted")

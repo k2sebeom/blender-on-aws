@@ -37,9 +37,6 @@ class RenderWorker(Thread):
             job (Job): The render job to queue
         """
         self._queue.put(job)
-        if not self.is_alive:
-            print("Restarting...")
-            self.run()
 
     def stop(self):
         """Stop the worker thread."""
