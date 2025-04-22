@@ -27,6 +27,11 @@ class RenderWorker:
 
         job_dir = self.workspace_service.parse_job_directory(job)
 
+        self.db_service.update_job(
+            job.id,
+            status='active',
+        )
+
         _, stdout, stderr = self.blender_service.render_blend_file(
             job_dir=job_dir,
             job=job,
