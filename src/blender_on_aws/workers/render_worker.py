@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import time
 
 from blender_on_aws.models.db import Job
 from blender_on_aws.services.blender_service import BlenderService
@@ -36,19 +37,19 @@ class RenderWorker:
         self.db_service.update_job(
             job.id,
             finished_at=datetime.now(timezone.utc),
+            status='complete',
         )
         print(f"Completed Job {job.name}-{job.id}")
         return ""
 
     def run(self):
         """Process jobs from the queue."""
-        queued_jobs = self.db_service.get_queued_jobs()
-
-        for job in queued_jobs:
-            self.render(job)
-
         while True:
             queued_jobs = self.db_service.get_queued_jobs()
+            if not queued_jobs:
+                print('Idle...')
+                time.sleep(10)
+
             print('Found queued jobs')
             for job in queued_jobs:
                 print(f'- {job.id}: {job.name}')
