@@ -14,4 +14,6 @@ def main():
     _, workspace_service, db_service = initialize_app()
     render_worker = RenderWorker(workspace_service, db_service)
 
+    print('Starting Worker...')
+
     render_worker.run()
