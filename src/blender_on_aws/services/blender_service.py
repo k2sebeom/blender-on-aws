@@ -69,28 +69,23 @@ class BlenderService:
                 cmd.extend(["-e", str(frames[1])])
             cmd.append("-a")
         
-        try:
-            process = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        process = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        
+        if job.mode == RenderMode.still:
+            # Get list of rendered PNG files
+            rendered_files = sorted(render_dir.glob("*.png"))
             
-            if job.mode == RenderMode.still:
-                # Get list of rendered PNG files
-                rendered_files = sorted(render_dir.glob("*.png"))
-                
-                if not rendered_files:
-                    rendered_files = []
+            if not rendered_files:
+                rendered_files = []
 
-                # Compress rendered files to JPG format
-                compressed_pairs = self.ffmpeg_service.compress_images(rendered_files, job_dir)
-                
-                return compressed_pairs, process.stdout, process.stderr
-            else:
-                # For animation mode, convert the rendered video to mp4
-                rendered_video = next(render_dir.glob("*"), None)
-                if rendered_video:
-                    video_pair = self.ffmpeg_service.convert_to_mp4(rendered_video, job_dir)
-                    return [video_pair], process.stdout, process.stderr
-                return [], process.stdout, process.stderr
-        except subprocess.CalledProcessError as e:
-            raise Exception(f"Blender render failed: {e.stderr}")
-        except Exception as e:
-            raise Exception(f"Error during rendering: {str(e)}")
+            # Compress rendered files to JPG format
+            compressed_pairs = self.ffmpeg_service.compress_images(rendered_files, job_dir)
+            
+            return compressed_pairs, process.stdout, process.stderr
+        else:
+            # For animation mode, convert the rendered video to mp4
+            rendered_video = next(render_dir.glob("*"), None)
+            if rendered_video:
+                video_pair = self.ffmpeg_service.convert_to_mp4(rendered_video, job_dir)
+                return [video_pair], process.stdout, process.stderr
+            return [], process.stdout, process.stderr
