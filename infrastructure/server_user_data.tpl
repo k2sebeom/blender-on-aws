@@ -15,19 +15,12 @@ sudo mkdir -p /mnt/efs
 sudo mount -t efs ${efs_id}:/ /mnt/efs
 echo "${efs_id}:/ /mnt/efs efs defaults,_netdev 0 0" >> /etc/fstab
 
-# Install blender
-sudo snap install blender --classic
-sudo apt install -y libgl1-mesa-glx libxi6 libxrender1 libegl1
-
-# Install ffmpeg
-sudo apt install -y ffmpeg
-
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.local/bin/env
+source /root/.local/bin/env
 
 # Install blender-on-aws
-cd /mnt/efs
+cd /root
 if [ ! -d "blender-on-aws" ]; then
   git clone ${github_repo}
 else
@@ -38,11 +31,10 @@ fi
 cd blender-on-aws
 export UV_PATH=$(which uv)
 export BLENDER_SERVER_ROOT=$(pwd)
+export WORKSPACE_ROOT='/mnt/efs/workspace'
+envsubst < config.yaml > config.tmp.yaml
+mv config.tmp.yaml config.yaml
 sudo envsubst < manifests/blender-server.service > /etc/systemd/system/blender-server.service
-sudo envsubst < manifests/blender-worker.service > /etc/systemd/system/blender-worker.service
 sudo systemctl daemon-reload
 sudo systemctl enable blender-server
 sudo systemctl start blender-server
-
-sudo systemctl enable blender-worker
-sudo systemctl start blender-worker

@@ -1,3 +1,20 @@
+# Get latest Ubuntu AMI
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-*-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical's AWS account ID
+}
+
 # Security Group for EC2
 resource "aws_security_group" "blender_sg" {
   name        = "blender-security-group"
@@ -24,9 +41,9 @@ resource "aws_security_group" "blender_sg" {
 }
 
 # EC2 Instance
-resource "aws_instance" "blender_instance" {
-  ami           = var.instance_ami
-  instance_type = var.instance_type
+resource "aws_instance" "server_instance" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.server_instance_type
   subnet_id     = module.vpc.private_subnets[0]
   iam_instance_profile = aws_iam_instance_profile.ec2_ssm_profile.name
 
@@ -38,11 +55,36 @@ resource "aws_instance" "blender_instance" {
   }
 
   tags = {
-    Name = "blender-instance"
+    Name = "blender-server"
   }
 
   # Script to mount EFS
-  user_data = templatefile("${path.module}/user_data.tpl", {
+  user_data = templatefile("${path.module}/server_user_data.tpl", {
+    efs_id             = aws_efs_file_system.blender_efs.id,
+    github_repo        = var.github_repo
+  })
+}
+
+# EC2 Instance
+resource "aws_instance" "worker_instance" {
+  ami           = var.instance_ami
+  instance_type = var.worker_instance_type
+  subnet_id     = module.vpc.private_subnets[0]
+  iam_instance_profile = aws_iam_instance_profile.ec2_ssm_profile.name
+
+  vpc_security_group_ids = [aws_security_group.blender_sg.id]
+
+  root_block_device {
+    volume_size = 75
+    volume_type = "gp3"
+  }
+
+  tags = {
+    Name = "blender-worker"
+  }
+
+  # Script to mount EFS
+  user_data = templatefile("${path.module}/worker_user_data.tpl", {
     efs_id             = aws_efs_file_system.blender_efs.id,
     github_repo        = var.github_repo
   })

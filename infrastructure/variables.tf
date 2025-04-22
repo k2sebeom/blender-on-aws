@@ -9,8 +9,14 @@ variable "instance_ami" {
   type        = string
 }
 
-variable "instance_type" {
-  description = "Instance type for the EC2 instance"
+variable "server_instance_type" {
+  description = "Instance type for the Server EC2 instance"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "worker_instance_type" {
+  description = "Instance type for the Worker EC2 instance"
   type        = string
   default     = "t3.micro"
 }

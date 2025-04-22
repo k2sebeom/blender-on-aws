@@ -68,7 +68,7 @@ resource "aws_lb_target_group" "blender_tg" {
 # Target Group Attachment
 resource "aws_lb_target_group_attachment" "blender_tg_attachment" {
   target_group_arn = aws_lb_target_group.blender_tg.arn
-  target_id        = aws_instance.blender_instance.id
+  target_id        = aws_instance.server_instance.id
   port             = 8501
 }
 
