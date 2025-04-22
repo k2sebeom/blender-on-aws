@@ -20,7 +20,7 @@ config, workspace_service, db_service = initialize_app()
 
 # Initialize render worker
 if "render_worker" not in st.session_state:
-    st.session_state.render_worker = RenderWorker(workspace_service, db_service)
+    st.session_state.render_worker = RenderWorker.get_instance(workspace_service, db_service)
     st.session_state.render_worker.start()
 
 # Add custom CSS
@@ -135,7 +135,7 @@ with cols[0]:
                     render_worker: RenderWorker = st.session_state.render_worker
                     if not render_worker.is_alive:
                         print("Reviving render worker...")
-                        st.session_state.render_worker = RenderWorker(
+                        st.session_state.render_worker = RenderWorker.get_instance(
                             workspace_service, db_service
                         )
                         st.session_state.render_worker.start()
