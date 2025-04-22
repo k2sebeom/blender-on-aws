@@ -1,0 +1,10 @@
+[Unit]
+Description=Blender render worker
+
+[Service]
+WorkingDirectory=${BLENDER_SERVER_ROOT}
+ExecStart=${UV_PATH} run worker
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
